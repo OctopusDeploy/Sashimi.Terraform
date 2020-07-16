@@ -316,6 +316,10 @@ namespace Sashimi.Terraform.Tests
         {
             var random = Guid.NewGuid().ToString("N").Substring(0, 6);
             var appName = $"cfe2e-{random}";
+            var expectedHostName = $"{appName}.azurewebsites.net";
+
+            using var temporaryFolder = TemporaryDirectory.Create();
+            CopyAllFiles(TestEnvironment.GetTestPath("Azure"), temporaryFolder.DirectoryPath);
 
             void PopulateVariables(TestActionHandlerContext<Program> _)
             {
@@ -327,6 +331,7 @@ namespace Sashimi.Terraform.Tests
                 _.Variables.Add("random", random);
                 _.Variables.Add(TerraformSpecialVariables.Action.Terraform.VarFiles, "example.tfvars");
                 _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AzureManagedAccount, Boolean.TrueString);
+                _.Variables.Add(KnownVariables.OriginalPackageDirectoryPath, temporaryFolder.DirectoryPath);
             }
 
             using (var outputs = ExecuteAndReturnLogOutput(PopulateVariables, "Azure", typeof(TerraformPlanActionHandler),
@@ -337,20 +342,21 @@ namespace Sashimi.Terraform.Tests
 
                 outputs.MoveNext();
                 outputs.Current.OutputVariables.ContainsKey("TerraformValueOutputs[url]").Should().BeTrue();
-                outputs.Current.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be($"{appName}.azurewebsites.net");
+                outputs.Current.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be(expectedHostName);
 
-                using (var client = new HttpClient())
-                {
-                    using (var responseMessage =
-                        await client.GetAsync($"https://{appName}.azurewebsites.net").ConfigureAwait(false))
-                    {
-                        Assert.AreEqual(HttpStatusCode.Forbidden, responseMessage.StatusCode);
-                    }
-                }
+                await MakeRequest();
 
                 outputs.MoveNext();
-                outputs.Current.FullLog.Should()
-                    .Contain("destroy -force -no-color");
+
+                Func<Task> request = async () => await MakeRequest();
+                request.Should().Throw<HttpRequestException>().WithMessage("No such host is known.");
+            }
+
+            async Task MakeRequest()
+            {
+                using var client = new HttpClient();
+                using var responseMessage = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
+                responseMessage.StatusCode.Should().Be(HttpStatusCode.Forbidden);
             }
         }
 
