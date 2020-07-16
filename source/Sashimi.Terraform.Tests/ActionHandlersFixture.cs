@@ -363,11 +363,11 @@ namespace Sashimi.Terraform.Tests
         [Test]
         public async Task AWSIntegration()
         {
-            var bucketName = $"cfe2e-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+            var bucketName = $"cfe2e-tf-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+            var expectedUrl = $"https://{bucketName}.s3.amazonaws.com/test.txt";
 
-            var temporaryFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N").Substring(0, 6));
-            Directory.CreateDirectory(temporaryFolder);
-            CopyAllFiles(TestEnvironment.GetTestPath("AWS"), temporaryFolder);
+            using var temporaryFolder = TemporaryDirectory.Create();
+            CopyAllFiles(TestEnvironment.GetTestPath("AWS"), temporaryFolder.DirectoryPath);
 
             void PopulateVariables(TestActionHandlerContext<Program> _)
             {
@@ -379,7 +379,7 @@ namespace Sashimi.Terraform.Tests
                 _.Variables.Add("bucket_name", bucketName);
                 _.Variables.Add(TerraformSpecialVariables.Action.Terraform.VarFiles, "example.tfvars");
                 _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AWSManagedAccount, "AWS");
-                _.Variables.Add(KnownVariables.OriginalPackageDirectoryPath, temporaryFolder);
+                _.Variables.Add(KnownVariables.OriginalPackageDirectoryPath, temporaryFolder.DirectoryPath);
             }
 
             using (var outputs = ExecuteAndReturnLogOutput(PopulateVariables, "AWS", typeof(TerraformPlanActionHandler), typeof(TerraformApplyActionHandler), typeof(TerraformDestroyActionHandler)).GetEnumerator())
@@ -389,12 +389,12 @@ namespace Sashimi.Terraform.Tests
 
                 outputs.MoveNext();
                 outputs.Current.OutputVariables.ContainsKey("TerraformValueOutputs[url]").Should().BeTrue();
-                outputs.Current.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be($"https://{bucketName}.s3.amazonaws.com/test.txt");
+                outputs.Current.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be(expectedUrl);
 
                 string fileData;
                 using (var client = new HttpClient())
                 {
-                    fileData = await client.GetStringAsync($"https://{bucketName}.s3.amazonaws.com/test.txt").ConfigureAwait(false);
+                    fileData = await client.GetStringAsync(expectedUrl).ConfigureAwait(false);
                 }
 
                 fileData.Should().Be("Hello World from AWS");
@@ -403,12 +403,9 @@ namespace Sashimi.Terraform.Tests
 
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetAsync($"https://{bucketName}.s3.amazonaws.com/test.txt").ConfigureAwait(false);
-
+                    var response = await client.GetAsync(expectedUrl).ConfigureAwait(false);
                     response.StatusCode.Should().Be(HttpStatusCode.NotFound);
                 }
-
-                Directory.Delete(temporaryFolder, true);
             }
         }
 
