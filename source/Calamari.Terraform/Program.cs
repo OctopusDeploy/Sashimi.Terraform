@@ -1,3 +1,7 @@
+using System;
+using Calamari.Common;
+using Calamari.Common.Plumbing.Logging;
+
 namespace Calamari.Terraform
 {
     public class Program : CalamariFlavourProgram
@@ -5,7 +9,7 @@ namespace Calamari.Terraform
         public Program(ILog log) : base(log)
         {
         }
-        
+
         public static int Main(string[] args)
         {
             return new Program(ConsoleLog.Instance).Run(args);
