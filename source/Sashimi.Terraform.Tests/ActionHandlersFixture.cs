@@ -45,7 +45,7 @@ namespace Sashimi.Terraform.Tests
                     HttpClient client = new HttpClient();
 
                     var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, downloadBaseUrl),
-                        HttpCompletionOption.ResponseHeadersRead);
+                                                          HttpCompletionOption.ResponseHeadersRead);
 
                     response.EnsureSuccessStatusCode();
 
@@ -57,13 +57,15 @@ namespace Sashimi.Terraform.Tests
                 catch (Exception ex)
                 {
                     Log.Error(
-                        $"There was an error accessing the terraform cli on try #{retry.CurrentTry}. Falling back to default. {ex.Message}");
+                              $"There was an error accessing the terraform cli on try #{retry.CurrentTry}. Falling back to default. {ex.Message}");
                     return false;
                 }
             }
 
-            static async Task DownloadTerraform(string fileName, HttpClient client, string downloadBaseUrl,
-                string destination)
+            static async Task DownloadTerraform(string fileName,
+                                                HttpClient client,
+                                                string downloadBaseUrl,
+                                                string destination)
             {
                 var zipPath = Path.Combine(Path.GetTempPath(), fileName);
                 using (new TemporaryFile(zipPath))
@@ -91,7 +93,7 @@ namespace Sashimi.Terraform.Tests
                         using (var client = new HttpClient())
                         {
                             var json = await client.GetStringAsync(
-                                "https://checkpoint-api.hashicorp.com/v1/check/terraform");
+                                                                   "https://checkpoint-api.hashicorp.com/v1/check/terraform");
                             var parsedJson = JObject.Parse(json);
 
                             var downloadBaseUrl = parsedJson["current_download_url"]!.Value<string>();
@@ -148,31 +150,36 @@ namespace Sashimi.Terraform.Tests
         {
             var additionalParams = "-var-file=\"backend.tfvars\"";
             ExecuteAndReturnLogOutput<TerraformPlanActionHandler>(_ =>
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AdditionalInitParams, additionalParams), "Simple")
-                .Should().Contain($"init -no-color -get-plugins=true {additionalParams}");
+                                                                      _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AdditionalInitParams, additionalParams),
+                                                                  "Simple")
+                .Should()
+                .Contain($"init -no-color -get-plugins=true {additionalParams}");
         }
 
         [Test]
         public void AllowPluginDownloadsShouldBeDisabled()
         {
             ExecuteAndReturnLogOutput<TerraformPlanActionHandler>(
-                _ =>
-                {
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AllowPluginDownloads,
-                        false.ToString());
-                }, "Simple").Should().Contain("init -no-color -get-plugins=false");
+                                                                  _ =>
+                                                                  {
+                                                                      _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AllowPluginDownloads,
+                                                                                      false.ToString());
+                                                                  },
+                                                                  "Simple")
+                .Should()
+                .Contain("init -no-color -get-plugins=false");
         }
 
         [Test]
         public void AttachLogFile()
         {
             ExecuteAndReturnLogOutput<TerraformPlanActionHandler>(_ =>
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AttachLogFile, true.ToString()),
-                "Simple",
-                result =>
-                {
-                    result.Artifacts.Count.Should().Be(1);
-                });
+                                                                      _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AttachLogFile, true.ToString()),
+                                                                  "Simple",
+                                                                  result =>
+                                                                  {
+                                                                      result.Artifacts.Count.Should().Be(1);
+                                                                  });
         }
 
         [Test]
@@ -183,7 +190,8 @@ namespace Sashimi.Terraform.Tests
         public void AdditionalActionParams(Type commandType, string expected)
         {
             ExecuteAndReturnLogOutput(commandType, _ => { _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AdditionalActionParams, "-var my_var=\"Hello world\""); }, "AdditionalParams")
-                .Should().Contain(expected);
+                .Should()
+                .Contain(expected);
         }
 
         [Test]
@@ -194,46 +202,52 @@ namespace Sashimi.Terraform.Tests
         public void VarFiles(Type commandType, string actual)
         {
             ExecuteAndReturnLogOutput(commandType, _ => { _.Variables.Add(TerraformSpecialVariables.Action.Terraform.VarFiles, "example.tfvars"); }, "WithVariables")
-                .Should().Contain(actual);
+                .Should()
+                .Contain(actual);
         }
 
         [Test]
         public void WithOutputSensitiveVariables()
         {
-            ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ => { }, "WithOutputSensitiveVariables",
-                result =>
-                {
-                    result.OutputVariables.Values.Should().OnlyContain(variable => variable.IsSensitive);
-                });
+            ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ => { },
+                                                                   "WithOutputSensitiveVariables",
+                                                                   result =>
+                                                                   {
+                                                                       result.OutputVariables.Values.Should().OnlyContain(variable => variable.IsSensitive);
+                                                                   });
         }
 
         [Test]
         public void OutputAndSubstituteOctopusVariables()
         {
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-                {
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.VarFiles, "example.txt");
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "example.txt");
-                    _.Variables.Add("Octopus.Action.StepName", "Step Name");
-                    _.Variables.Add("Should_Be_Substituted", "Hello World");
-                    _.Variables.Add("Should_Be_Substituted_in_txt", "Hello World from text");
-                }, "WithVariablesSubstitution",
-                result =>
-                {
-                    result.OutputVariables
-                        .ContainsKey("TerraformValueOutputs[my_output]")
-                        .Should().BeTrue();
-                    result.OutputVariables["TerraformValueOutputs[my_output]"].Value
-                        .Should()
-                        .Be("Hello World");
-                    result.OutputVariables
-                        .ContainsKey("TerraformValueOutputs[my_output_from_txt_file]")
-                        .Should().BeTrue();
-                    result.OutputVariables["TerraformValueOutputs[my_output_from_txt_file]"]
-                        .Value
-                        .Should()
-                        .Be("Hello World from text");
-                });
+                                                                   {
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.VarFiles, "example.txt");
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "example.txt");
+                                                                       _.Variables.Add("Octopus.Action.StepName", "Step Name");
+                                                                       _.Variables.Add("Should_Be_Substituted", "Hello World");
+                                                                       _.Variables.Add("Should_Be_Substituted_in_txt", "Hello World from text");
+                                                                   },
+                                                                   "WithVariablesSubstitution",
+                                                                   result =>
+                                                                   {
+                                                                       result.OutputVariables
+                                                                             .ContainsKey("TerraformValueOutputs[my_output]")
+                                                                             .Should()
+                                                                             .BeTrue();
+                                                                       result.OutputVariables["TerraformValueOutputs[my_output]"]
+                                                                             .Value
+                                                                             .Should()
+                                                                             .Be("Hello World");
+                                                                       result.OutputVariables
+                                                                             .ContainsKey("TerraformValueOutputs[my_output_from_txt_file]")
+                                                                             .Should()
+                                                                             .BeTrue();
+                                                                       result.OutputVariables["TerraformValueOutputs[my_output_from_txt_file]"]
+                                                                             .Value
+                                                                             .Should()
+                                                                             .Be("Hello World from text");
+                                                                   });
         }
 
         [Test]
@@ -248,9 +262,10 @@ namespace Sashimi.Terraform.Tests
         public void EnableNoMatchWarningIsNotSetWithAdditionSubstitution()
         {
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-                {
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "doesNotExist.txt");
-                }, "Simple")
+                                                                   {
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "doesNotExist.txt");
+                                                                   },
+                                                                   "Simple")
                 .Should()
                 .Contain("No files were found that match the substitution target pattern '**/*.tfvars.json'")
                 .And
@@ -261,10 +276,11 @@ namespace Sashimi.Terraform.Tests
         public void EnableNoMatchWarningIsTrue()
         {
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-                {
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "doesNotExist.txt");
-                    _.Variables.Add(KnownVariables.Action.SubstituteInFiles.EnableNoMatchWarning, "true");
-                }, "Simple")
+                                                                   {
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "doesNotExist.txt");
+                                                                       _.Variables.Add(KnownVariables.Action.SubstituteInFiles.EnableNoMatchWarning, "true");
+                                                                   },
+                                                                   "Simple")
                 .Should()
                 .Contain("No files were found that match the substitution target pattern '**/*.tfvars.json'")
                 .And
@@ -275,10 +291,11 @@ namespace Sashimi.Terraform.Tests
         public void EnableNoMatchWarningIsFalse()
         {
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-                {
-                    _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "doesNotExist.txt");
-                    _.Variables.Add(KnownVariables.Action.SubstituteInFiles.EnableNoMatchWarning, "False");
-                }, "Simple")
+                                                                   {
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.FileSubstitution, "doesNotExist.txt");
+                                                                       _.Variables.Add(KnownVariables.Action.SubstituteInFiles.EnableNoMatchWarning, "False");
+                                                                   },
+                                                                   "Simple")
                 .Should()
                 .NotContain("No files were found that match the substitution target pattern");
         }
@@ -288,27 +305,32 @@ namespace Sashimi.Terraform.Tests
         [TestCase(typeof(TerraformPlanDestroyActionHandler))]
         public void TerraformPlanOutput(Type commandType)
         {
-            ExecuteAndReturnLogOutput(commandType, _ => { _.Variables.Add("Octopus.Action.StepName", "Step Name"); }, "Simple",
-                    result =>
-                    {
-                        result.OutputVariables
-                            .ContainsKey("TerraformPlanOutput")
-                            .Should().BeTrue();
-                    });
+            ExecuteAndReturnLogOutput(commandType,
+                                      _ => { _.Variables.Add("Octopus.Action.StepName", "Step Name"); },
+                                      "Simple",
+                                      result =>
+                                      {
+                                          result.OutputVariables
+                                                .ContainsKey("TerraformPlanOutput")
+                                                .Should()
+                                                .BeTrue();
+                                      });
         }
 
         [Test]
         public void UsesWorkSpace()
         {
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ => { _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Workspace, "myspace"); }, "Simple")
-                .Should().Contain("workspace new \"myspace\"");
+                .Should()
+                .Contain("workspace new \"myspace\"");
         }
 
         [Test]
         public void UsesTemplateDirectory()
         {
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ => { _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateDirectory, "SubFolder"); }, "TemplateDirectory")
-                .Should().Contain($"SubFolder{Path.DirectorySeparatorChar}example.tf");
+                .Should()
+                .Contain($"SubFolder{Path.DirectorySeparatorChar}example.tf");
         }
 
         [Test]
@@ -405,7 +427,7 @@ namespace Sashimi.Terraform.Tests
             void PopulateVariables(TestActionHandlerContext<Program> _)
             {
                 _.Variables.Add(TerraformSpecialVariables.Action.Terraform.AdditionalActionParams,
-                    $"-state=\"{Path.Combine(stateFileFolder.DirectoryPath, "terraform.tfstate")}\" -refresh=false");
+                                $"-state=\"{Path.Combine(stateFileFolder.DirectoryPath, "terraform.tfstate")}\" -refresh=false");
             }
 
             var output = ExecuteAndReturnResult(typeof(TerraformPlanActionHandler), PopulateVariables, "PlanDetailedExitCode");
@@ -414,7 +436,7 @@ namespace Sashimi.Terraform.Tests
 
             output = ExecuteAndReturnResult(typeof(TerraformApplyActionHandler), PopulateVariables, "PlanDetailedExitCode");
             output.FullLog.Should()
-                .Contain("apply -no-color -auto-approve");
+                  .Contain("apply -no-color -auto-approve");
 
             output = ExecuteAndReturnResult(typeof(TerraformPlanActionHandler), PopulateVariables, "PlanDetailedExitCode");
             output.OutputVariables.ContainsKey("TerraformPlanDetailedExitCode").Should().BeTrue();
@@ -469,17 +491,19 @@ output ""nestedmap"" {
 }";
 
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-            {
-                _.Variables.Add("RandomNumber", new Random().Next().ToString());
-                _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
-                _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, variables);
-                _.Variables.Add(KnownVariables.Action.Script.ScriptSource,
-                    KnownVariables.Action.Script.ScriptSourceOptions.Inline);
-            }, String.Empty, _ =>
-            {
-                _.OutputVariables.ContainsKey("TerraformValueOutputs[nestedlist]").Should().BeTrue();
-                _.OutputVariables.ContainsKey("TerraformValueOutputs[nestedmap]").Should().BeTrue();
-            });
+                                                                   {
+                                                                       _.Variables.Add("RandomNumber", new Random().Next().ToString());
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, variables);
+                                                                       _.Variables.Add(KnownVariables.Action.Script.ScriptSource,
+                                                                                       KnownVariables.Action.Script.ScriptSourceOptions.Inline);
+                                                                   },
+                                                                   String.Empty,
+                                                                   _ =>
+                                                                   {
+                                                                       _.OutputVariables.ContainsKey("TerraformValueOutputs[nestedlist]").Should().BeTrue();
+                                                                       _.OutputVariables.ContainsKey("TerraformValueOutputs[nestedmap]").Should().BeTrue();
+                                                                   });
         }
 
         [Test]
@@ -505,20 +529,25 @@ CONFIGMAPAWSAUTH
 
 output ""config-map-aws-auth"" {{
     value = ""${{local.config-map-aws-auth}}""
-}}", expected);
+}}",
+                                            expected);
 
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-            {
-                _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
-                _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, "{}");
-                _.Variables.Add(KnownVariables.Action.Script.ScriptSource,
-                    KnownVariables.Action.Script.ScriptSourceOptions.Inline);
-            }, String.Empty, _ =>
-            {
-                _.OutputVariables.ContainsKey("TerraformValueOutputs[config-map-aws-auth]").Should().BeTrue();
-                _.OutputVariables["TerraformValueOutputs[config-map-aws-auth]"].Value.Should().Be(
-                    $"{expected}{Environment.NewLine}");
-            });
+                                                                   {
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, "{}");
+                                                                       _.Variables.Add(KnownVariables.Action.Script.ScriptSource,
+                                                                                       KnownVariables.Action.Script.ScriptSourceOptions.Inline);
+                                                                   },
+                                                                   String.Empty,
+                                                                   _ =>
+                                                                   {
+                                                                       _.OutputVariables.ContainsKey("TerraformValueOutputs[config-map-aws-auth]").Should().BeTrue();
+                                                                       _.OutputVariables["TerraformValueOutputs[config-map-aws-auth]"]
+                                                                        .Value.Should()
+                                                                        .Be(
+                                                                            $"{expected}{Environment.NewLine}");
+                                                                   });
         }
 
         [Test]
@@ -559,19 +588,21 @@ output ""config-map-aws-auth"" {{
             var randomNumber = new Random().Next().ToString();
 
             ExecuteAndReturnLogOutput<TerraformApplyActionHandler>(_ =>
-            {
-                _.Variables.Add("RandomNumber", randomNumber);
-                _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
-                _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, variables);
-                _.Variables.Add(KnownVariables.Action.Script.ScriptSource,
-                    KnownVariables.Action.Script.ScriptSourceOptions.Inline);
-            }, String.Empty, _ =>
-            {
-                _.OutputVariables.ContainsKey("TerraformValueOutputs[ami]").Should().BeTrue();
-                _.OutputVariables["TerraformValueOutputs[ami]"].Value.Should().Be("new ami value");
-                _.OutputVariables.ContainsKey("TerraformValueOutputs[random]").Should().BeTrue();
-                _.OutputVariables["TerraformValueOutputs[random]"].Value.Should().Be(randomNumber);
-            });
+                                                                   {
+                                                                       _.Variables.Add("RandomNumber", randomNumber);
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
+                                                                       _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, variables);
+                                                                       _.Variables.Add(KnownVariables.Action.Script.ScriptSource,
+                                                                                       KnownVariables.Action.Script.ScriptSourceOptions.Inline);
+                                                                   },
+                                                                   String.Empty,
+                                                                   _ =>
+                                                                   {
+                                                                       _.OutputVariables.ContainsKey("TerraformValueOutputs[ami]").Should().BeTrue();
+                                                                       _.OutputVariables["TerraformValueOutputs[ami]"].Value.Should().Be("new ami value");
+                                                                       _.OutputVariables.ContainsKey("TerraformValueOutputs[random]").Should().BeTrue();
+                                                                       _.OutputVariables["TerraformValueOutputs[random]"].Value.Should().Be(randomNumber);
+                                                                   });
         }
 
         static void CopyAllFiles(string sourceFolderPath, string destinationFolderPath)
@@ -594,14 +625,17 @@ output ""config-map-aws-auth"" {{
             }
         }
 
-        string ExecuteAndReturnLogOutput(Type commandType, Action<TestActionHandlerContext<Program>> populateVariables,
-            string folderName, Action<TestActionHandlerResult>? assert = null)
+        string ExecuteAndReturnLogOutput(Type commandType,
+                                         Action<TestActionHandlerContext<Program>> populateVariables,
+                                         string folderName,
+                                         Action<TestActionHandlerResult>? assert = null)
         {
             return ExecuteAndReturnResult(commandType, populateVariables, folderName, assert).FullLog;
         }
 
         string ExecuteAndReturnLogOutput<T>(Action<TestActionHandlerContext<Program>> populateVariables,
-            string folderName, Action<TestActionHandlerResult>? assert = null) where T : IActionHandler
+                                            string folderName,
+                                            Action<TestActionHandlerResult>? assert = null) where T : IActionHandler
         {
             return ExecuteAndReturnLogOutput(typeof(T), populateVariables, folderName, assert);
         }
@@ -613,23 +647,23 @@ output ""config-map-aws-auth"" {{
             var terraformFiles = TestEnvironment.GetTestPath(folderName);
 
             var result = ActionHandlerTestBuilder.Create<Program>(commandType)
-                .WithArrange(context =>
-                {
-                    context.Variables.Add(KnownVariables.Action.Script.ScriptSource,
-                        KnownVariables.Action.Script.ScriptSourceOptions.Package);
-                    context.Variables.Add(KnownVariables.Action.Packages.PackageId, terraformFiles);
-                    context.Variables.Add(TerraformSpecialVariables.Calamari.TerraformCliPath,
-                        Path.GetDirectoryName(customTerraformExecutable));
-                    context.Variables.Add(TerraformSpecialVariables.Action.Terraform.CustomTerraformExecutable,
-                        customTerraformExecutable);
+                                                 .WithArrange(context =>
+                                                              {
+                                                                  context.Variables.Add(KnownVariables.Action.Script.ScriptSource,
+                                                                                        KnownVariables.Action.Script.ScriptSourceOptions.Package);
+                                                                  context.Variables.Add(KnownVariables.Action.Packages.PackageId, terraformFiles);
+                                                                  context.Variables.Add(TerraformSpecialVariables.Calamari.TerraformCliPath,
+                                                                                        Path.GetDirectoryName(customTerraformExecutable));
+                                                                  context.Variables.Add(TerraformSpecialVariables.Action.Terraform.CustomTerraformExecutable,
+                                                                                        customTerraformExecutable);
 
-                    populateVariables(context);
-                })
-                .WithAssert(result =>
-                {
-                    Assert.IsTrue(result.WasSuccessful);
-                })
-                .Execute();
+                                                                  populateVariables(context);
+                                                              })
+                                                 .WithAssert(result =>
+                                                             {
+                                                                 Assert.IsTrue(result.WasSuccessful);
+                                                             })
+                                                 .Execute();
 
             assertResult(result);
             return result;
