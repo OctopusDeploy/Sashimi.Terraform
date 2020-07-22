@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -36,9 +35,12 @@ namespace Sashimi.Terraform.Tests
         {
             static string GetTerraformFileName(string currentVersion)
             {
-                return CalamariEnvironment.IsRunningOnNix
-                    ? $"terraform_{currentVersion}_linux_amd64.zip"
-                    : $"terraform_{currentVersion}_windows_amd64.zip";
+                if (CalamariEnvironment.IsRunningOnNix)
+                    return $"terraform_{currentVersion}_linux_amd64.zip";
+                if (CalamariEnvironment.IsRunningOnMac)
+                    return $"terraform_{currentVersion}_darwin_amd64.zip";
+
+                return $"terraform_{currentVersion}_windows_amd64.zip";
             }
 
             static async Task<bool> TerraformFileAvailable(string downloadBaseUrl, RetryTracker retry)
@@ -548,9 +550,8 @@ output ""config-map-aws-auth"" {{
                                                                    {
                                                                        _.OutputVariables.ContainsKey("TerraformValueOutputs[config-map-aws-auth]").Should().BeTrue();
                                                                        _.OutputVariables["TerraformValueOutputs[config-map-aws-auth]"]
-                                                                        .Value.Should()
-                                                                        .Be(
-                                                                            $"{expected}{Environment.NewLine}");
+                                                                        .Value?.TrimEnd().Should()
+                                                                        .Be($"{expected}");
                                                                    });
         }
 
