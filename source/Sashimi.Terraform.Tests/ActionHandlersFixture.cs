@@ -5,8 +5,10 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Calamari.CloudAccounts;
+using Calamari.Common.Features.Processes;
 using Calamari.Common.Plumbing;
 using Calamari.Common.Plumbing.FileSystem;
 using Calamari.Common.Plumbing.Logging;
@@ -116,6 +118,7 @@ namespace Sashimi.Terraform.Tests
                         customTerraformExecutable = Directory.EnumerateFiles(destination).FirstOrDefault();
                         Console.WriteLine($"Downloaded terraform to {customTerraformExecutable}");
 
+                        ExecutableHelper.AddExecutePermission(customTerraformExecutable);
                         break;
                     }
                     catch
@@ -367,7 +370,7 @@ namespace Sashimi.Terraform.Tests
 
             ExecuteAndReturnResult(typeof(TerraformDestroyActionHandler), PopulateVariables, "Azure");
             Func<Task> request = async () => await MakeRequest();
-            request.Should().Throw<HttpRequestException>().WithMessage("No such host is known.");
+            request.Should().Throw<HttpRequestException>().And.Message.Should().Contain("known");
 
             async Task MakeRequest()
             {
