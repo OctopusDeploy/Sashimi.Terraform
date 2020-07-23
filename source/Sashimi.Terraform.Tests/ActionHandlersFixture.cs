@@ -378,7 +378,7 @@ namespace Sashimi.Terraform.Tests
             {
                 using var client = new HttpClient();
                 using var responseMessage = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
-                responseMessage.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+                new[] { HttpStatusCode.Forbidden, HttpStatusCode.NotFound }.Should().Contain(responseMessage.StatusCode);
             }
         }
 
