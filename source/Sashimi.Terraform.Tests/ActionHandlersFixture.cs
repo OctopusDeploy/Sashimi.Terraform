@@ -368,35 +368,26 @@ namespace Sashimi.Terraform.Tests
             output = ExecuteAndReturnResult(typeof(TerraformApplyActionHandler), PopulateVariables, "Azure");
             output.OutputVariables.ContainsKey("TerraformValueOutputs[url]").Should().BeTrue();
             output.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be(expectedHostName);
-            await MakeRequest();
+            await AssertRequestResponse(HttpStatusCode.Forbidden);
 
             ExecuteAndReturnResult(typeof(TerraformDestroyActionHandler), PopulateVariables, "Azure");
 
+            //This will throw on some platforms and return "NotFound" on others
             try
             {
-                await MakeRequest();
+                await AssertRequestResponse(HttpStatusCode.NotFound);
             }
             catch (HttpRequestException ex)
             {
-                ex.Should().BeAssignableTo<HttpRequestException>().Subject.Message.Should().Contain("known");
+                ex.Message.Should().Contain("known");
             }
 
-            async Task MakeRequest()
+            async Task AssertRequestResponse(HttpStatusCode expectedStatusCode)
             {
-                var responseMessage = await MakeRequestInner(expectedHostName);
-                new[]
-                {
-                    HttpStatusCode.Forbidden,
-                    //HttpStatusCode.NotFound
-                }.Should().Contain(responseMessage.StatusCode);
+                using var client = new HttpClient();
+                var response = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
+                response.StatusCode.Should().Be(expectedStatusCode);
             }
-        }
-
-        static async Task<HttpResponseMessage> MakeRequestInner(string expectedHostName)
-        {
-            using var client = new HttpClient();
-            using var responseMessage = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
-            return responseMessage;
         }
 
         [Test]
