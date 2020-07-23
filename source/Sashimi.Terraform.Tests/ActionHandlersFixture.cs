@@ -374,7 +374,7 @@ namespace Sashimi.Terraform.Tests
 
             try
             {
-                await MakeRequest();
+                await MakeRequestInner(expectedHostName);
             }
             catch (Exception ex)
             {
@@ -383,14 +383,20 @@ namespace Sashimi.Terraform.Tests
 
             async Task MakeRequest()
             {
-                using var client = new HttpClient();
-                using var responseMessage = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
+                var responseMessage = await MakeRequestInner(expectedHostName);
                 new[]
                 {
                     HttpStatusCode.Forbidden,
                     //HttpStatusCode.NotFound
                 }.Should().Contain(responseMessage.StatusCode);
             }
+        }
+
+        static async Task<HttpResponseMessage> MakeRequestInner(string expectedHostName)
+        {
+            using var client = new HttpClient();
+            using var responseMessage = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
+            return responseMessage;
         }
 
         [Test]
