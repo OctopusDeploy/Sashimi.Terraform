@@ -372,14 +372,19 @@ namespace Sashimi.Terraform.Tests
 
             ExecuteAndReturnResult(typeof(TerraformDestroyActionHandler), PopulateVariables, "Azure");
 
-            //This will throw on some platforms and return "NotFound" on others
-            try
+            await AssertResponseIsNotReachable();
+
+            async Task AssertResponseIsNotReachable()
             {
-                await AssertRequestResponse(HttpStatusCode.NotFound);
-            }
-            catch (HttpRequestException ex)
-            {
-                ex.Message.Should().Contain("known");
+                //This will throw on some platforms and return "NotFound" on others
+                try
+                {
+                    await AssertRequestResponse(HttpStatusCode.NotFound);
+                }
+                catch (HttpRequestException ex)
+                {
+                    ex.Message.Should().BeOneOf("No such host is known.");
+                }
             }
 
             async Task AssertRequestResponse(HttpStatusCode expectedStatusCode)
