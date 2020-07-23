@@ -371,14 +371,25 @@ namespace Sashimi.Terraform.Tests
             await MakeRequest();
 
             ExecuteAndReturnResult(typeof(TerraformDestroyActionHandler), PopulateVariables, "Azure");
-            Func<Task> request = async () => await MakeRequest();
-            request.Should().Throw<HttpRequestException>().And.Message.Should().Contain("known");
+
+            try
+            {
+                await MakeRequest();
+            }
+            catch (Exception ex)
+            {
+                ex.Should().BeAssignableTo<HttpRequestException>().Subject.Message.Should().Contain("known");
+            }
 
             async Task MakeRequest()
             {
                 using var client = new HttpClient();
                 using var responseMessage = await client.GetAsync($"https://{expectedHostName}").ConfigureAwait(false);
-                new[] { HttpStatusCode.Forbidden, HttpStatusCode.NotFound }.Should().Contain(responseMessage.StatusCode);
+                new[]
+                {
+                    HttpStatusCode.Forbidden,
+                    //HttpStatusCode.NotFound
+                }.Should().Contain(responseMessage.StatusCode);
             }
         }
 
