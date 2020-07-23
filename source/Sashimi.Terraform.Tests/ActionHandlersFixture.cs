@@ -383,7 +383,10 @@ namespace Sashimi.Terraform.Tests
                 }
                 catch (HttpRequestException ex)
                 {
-                    ex.Message.Should().BeOneOf("No such host is known.");
+                    ex.Message.Should().BeOneOf(
+                                                "No such host is known.",
+                                                "Name or service not known"
+                                                );
                 }
             }
 
