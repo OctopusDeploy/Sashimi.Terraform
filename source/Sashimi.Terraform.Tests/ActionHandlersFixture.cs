@@ -374,9 +374,9 @@ namespace Sashimi.Terraform.Tests
 
             try
             {
-                await MakeRequestInner(expectedHostName);
+                await MakeRequest();
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
                 ex.Should().BeAssignableTo<HttpRequestException>().Subject.Message.Should().Contain("known");
             }
