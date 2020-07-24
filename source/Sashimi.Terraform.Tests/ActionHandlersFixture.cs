@@ -385,8 +385,8 @@ namespace Sashimi.Terraform.Tests
                 {
                     ex.Message.Should().BeOneOf(
                                                 "No such host is known.",
-                                                "Name or service not known",
-                                                "nodename nor servname provided, or not known"
+                                                "Name or service not known", //Some Linux distros
+                                                "nodename nor servname provided, or not known" //Mac
                                                 );
                 }
             }
