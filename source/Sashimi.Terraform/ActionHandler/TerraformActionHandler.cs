@@ -1,10 +1,13 @@
 ﻿using System;
+using FluentValidation;
 using Octopus.CoreUtilities;
 using Sashimi.Server.Contracts;
 using Sashimi.Server.Contracts.ActionHandlers;
+using Sashimi.Server.Contracts.ActionHandlers.Validation;
 using Sashimi.Server.Contracts.Calamari;
 using Sashimi.Server.Contracts.CloudTemplates;
 using Sashimi.Terraform.CloudTemplates;
+using Sashimi.Terraform.Validation;
 
 namespace Sashimi.Terraform.ActionHandler
 {
@@ -32,6 +35,7 @@ namespace Sashimi.Terraform.ActionHandler
         public bool WhenInAChildStepRunInTheContextOfTheTargetMachine => false;
         public bool CanRunOnDeploymentTarget => false;
         public ActionHandlerCategory[] Categories => new[] { ActionHandlerCategory.BuiltInStep, ActionHandlerCategory.Terraform };
+        public abstract IValidator<DeploymentActionValidationContext>? Validator { get; }
 
         public IActionHandlerResult Execute(IActionHandlerContext context)
         {
