@@ -14,7 +14,7 @@ namespace Sashimi.Terraform.ActionHandler
     /// </summary>
     abstract class TerraformActionHandler : IActionHandler
     {
-        public static readonly CalamariFlavour CalamariTerraform = new CalamariFlavour("Calamari.Terraform", WindowsNetFramework.Net452, WindowsNetFramework.Net452, NetCoreSupport.Supported);
+        public static readonly CalamariFlavour CalamariTerraform = new CalamariFlavour("Calamari.Terraform");
 
         readonly ICloudTemplateHandlerFactory cloudTemplateHandlerFactory;
 
