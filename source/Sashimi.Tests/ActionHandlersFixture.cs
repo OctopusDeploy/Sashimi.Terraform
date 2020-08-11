@@ -668,6 +668,9 @@ output ""config-map-aws-auth"" {{
 
             var terraformFiles = TestEnvironment.GetTestPath(folderName);
 
+            Console.WriteLine("TF file 123: " + terraformFiles);
+            Console.WriteLine("Dir 123: " + string.Join("\r\n", Directory.GetFiles(terraformFiles)));
+
             var result = ActionHandlerTestBuilder.Create<Program>(commandType)
                                                  .WithArrange(context =>
                                                               {
