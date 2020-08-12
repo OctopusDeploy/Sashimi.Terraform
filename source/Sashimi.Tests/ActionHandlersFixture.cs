@@ -679,6 +679,7 @@ output ""config-map-aws-auth"" {{
                                                                   context.Variables.Add(TerraformSpecialVariables.Action.Terraform.CustomTerraformExecutable,
                                                                                         customTerraformExecutable);
 
+                                                                  context.WithFilesToCopy(terraformFiles);
                                                                   populateVariables(context);
                                                               })
                                                  .WithAssert(result =>
