@@ -531,7 +531,7 @@ output ""config-map-aws-auth"" {{
                                                                        _.OutputVariables.ContainsKey("TerraformValueOutputs[config-map-aws-auth]").Should().BeTrue();
                                                                        _.OutputVariables["TerraformValueOutputs[config-map-aws-auth]"]
                                                                         .Value?.TrimEnd().Should()
-                                                                        .Be($"{expected}");
+                                                                        .Be($"{expected.Replace("\r\n", "\n")}");
                                                                    });
         }
 
