@@ -26,6 +26,9 @@ namespace Sashimi.Terraform.Tests
     [TestFixture]
     public class ActionHandlersFixture
     {
+        //This is the version of the Terraform CLI we bundle
+        const string TerraformVersion = "0.11.8";
+
         string? customTerraformExecutable;
 
         [OneTimeSetUp]
@@ -39,30 +42,6 @@ namespace Sashimi.Terraform.Tests
                     return $"terraform_{currentVersion}_darwin_amd64.zip";
 
                 return $"terraform_{currentVersion}_windows_amd64.zip";
-            }
-
-            static async Task<bool> TerraformFileAvailable(string downloadBaseUrl, RetryTracker retry)
-            {
-                try
-                {
-                    HttpClient client = new HttpClient();
-
-                    var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, downloadBaseUrl),
-                                                          HttpCompletionOption.ResponseHeadersRead);
-
-                    response.EnsureSuccessStatusCode();
-
-                    using (response)
-                    {
-                        return true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(
-                              $"There was an error accessing the terraform cli on try #{retry.CurrentTry}. Falling back to default. {ex.Message}");
-                    return false;
-                }
             }
 
             static async Task DownloadTerraform(string fileName,
@@ -95,22 +74,8 @@ namespace Sashimi.Terraform.Tests
                     {
                         using (var client = new HttpClient())
                         {
-                            var json = await client.GetStringAsync(
-                                                                   "https://checkpoint-api.hashicorp.com/v1/check/terraform");
-                            var parsedJson = JObject.Parse(json);
-
-                            var downloadBaseUrl = parsedJson["current_download_url"]!.Value<string>();
-                            var currentVersion = parsedJson["current_version"]!.Value<string>();
-                            var fileName = GetTerraformFileName(currentVersion);
-
-                            if (!await TerraformFileAvailable(downloadBaseUrl, retry))
-                            {
-                                // At times Terraform's API has been unreliable. This is a fallback
-                                // for a version we know exists.
-                                downloadBaseUrl = "https://releases.hashicorp.com/terraform/0.12.19/";
-                                currentVersion = "0.12.19";
-                                fileName = GetTerraformFileName(currentVersion);
-                            }
+                            var downloadBaseUrl = $"https://releases.hashicorp.com/terraform/{TerraformVersion}/";
+                            var fileName = GetTerraformFileName(TerraformVersion);
 
                             await DownloadTerraform(fileName, client, downloadBaseUrl, destination);
                         }
