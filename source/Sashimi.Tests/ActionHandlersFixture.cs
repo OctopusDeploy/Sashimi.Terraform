@@ -11,15 +11,16 @@ using Calamari.Common.Plumbing.FileSystem;
 using Calamari.Common.Plumbing.Logging;
 using Calamari.Common.Plumbing.Retry;
 using Calamari.Terraform;
+using Calamari.Tests.Helpers;
 using Calamari.Tests.Shared;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-using Sashimi.Server.Contracts;
 using Sashimi.Server.Contracts.ActionHandlers;
 using Sashimi.Terraform.ActionHandler;
-using Sashimi.Tests.Shared;
 using Sashimi.Tests.Shared.Server;
+using KnownVariables = Sashimi.Server.Contracts.KnownVariables;
+using TestEnvironment = Sashimi.Tests.Shared.TestEnvironment;
 
 namespace Sashimi.Terraform.Tests
 {
@@ -27,7 +28,7 @@ namespace Sashimi.Terraform.Tests
     public class ActionHandlersFixture
     {
         //This is the version of the Terraform CLI we bundle
-        const string TerraformVersion = "0.11.8";
+        const string TerraformVersion = BundledCliFixture.TerraformVersion;
 
         string? customTerraformExecutable;
 
