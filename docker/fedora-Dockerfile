@@ -7,4 +7,4 @@ RUN dnf -y install dotnet-sdk-3.1
 
 WORKDIR /artifacts
 
-ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter "TestCategory != Windows" --logger trx
+ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter:"TestCategory != Windows" --logger:trx

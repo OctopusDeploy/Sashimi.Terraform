@@ -13,4 +13,4 @@ RUN yum -y clean all
 
 WORKDIR /artifacts
 
-ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter "TestCategory != Windows" --logger trx
+ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter:"TestCategory != Windows" --logger:trx

@@ -17,7 +17,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     centos:
         build:
             context: .
@@ -25,7 +25,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     debian:
         build:
             context: .
@@ -33,7 +33,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     fedora:
         build:
             context: .
@@ -41,7 +41,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     opensuse:
         build:
             context: .
@@ -49,7 +49,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     rhel:
         build:
             context: .
@@ -57,7 +57,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     sles:
         build:
             context: .
@@ -65,7 +65,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     ubuntu18:
         build:
             context: .
@@ -73,7 +73,7 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     ubuntu20:
         build:
             context: .
@@ -81,4 +81,4 @@ services:
         environment:
             TEAMCITY_VERSION: 1.2.3
         volumes:
-            - C:/temp/artifacts:/artifacts
+            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts

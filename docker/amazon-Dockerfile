@@ -10,4 +10,4 @@ RUN rpm -Uvh https://packages.microsoft.com/config/centos/7/packages-microsoft-p
 
 WORKDIR /artifacts
 
-ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter "TestCategory != Windows" --logger trx
+ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter:"TestCategory != Windows" --logger:trx
