@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-focal
+
+VOLUME /artifacts
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+WORKDIR /artifacts
+
+ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter "TestCategory != Windows" --logger trx

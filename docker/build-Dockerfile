@@ -1,0 +1,10 @@
+FROM --platform=windows/amd64 mcr.microsoft.com/dotnet/framework/sdk:4.8
+
+RUN dotnet tool install --global Cake.Tool --version=0.38.2
+
+VOLUME C:/artifacts
+VOLUME C:/build
+
+WORKDIR C:/build
+
+ENTRYPOINT dotnet cake; copy ./artifacts/*.* c:/artifacts

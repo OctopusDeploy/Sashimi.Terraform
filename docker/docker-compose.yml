@@ -1,0 +1,84 @@
+version: '3.8'
+services:
+    build:
+        build:
+            context: .
+            dockerfile: build-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+            Git_Branch: main
+        volumes:
+            - C:/temp/artifacts:C:/artifacts
+            - ../:C:/build
+    amazon:
+        build:
+            context: .
+            dockerfile: amazon-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    centos:
+        build:
+            context: .
+            dockerfile: centOS-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    debian:
+        build:
+            context: .
+            dockerfile: debian-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    fedora:
+        build:
+            context: .
+            dockerfile: fedora-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    opensuse:
+        build:
+            context: .
+            dockerfile: openSUSE-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    rhel:
+        build:
+            context: .
+            dockerfile: rhel-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    sles:
+        build:
+            context: .
+            dockerfile: sles-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    ubuntu18:
+        build:
+            context: .
+            dockerfile: ubuntu18-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts
+    ubuntu20:
+        build:
+            context: .
+            dockerfile: ubuntu20-Dockerfile
+        environment:
+            TEAMCITY_VERSION: 1.2.3
+        volumes:
+            - C:/temp/artifacts:/artifacts

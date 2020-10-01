@@ -1,0 +1,8 @@
+FROM registry.access.redhat.com/ubi8/dotnet-31
+
+VOLUME /artifacts
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+WORKDIR /artifacts
+
+ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter "TestCategory != Windows" --logger trx
