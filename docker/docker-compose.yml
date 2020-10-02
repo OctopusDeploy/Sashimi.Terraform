@@ -1,6 +1,9 @@
 version: '3.8'
 
 x-linux-test-defaults: &linux-test-defaults
+    platform: linux
+    depends_on:
+        - build
     volumes:
         - ../publish:/publish
     environment:
@@ -13,11 +16,15 @@ x-linux-test-defaults: &linux-test-defaults
 
 services:
     build:
+        platform: windows
         build:
             context: .
             dockerfile: build-Dockerfile
         volumes:
             - ../:C:/repoRoot
+        environment:
+            TEAMCITY_VERSION:
+            Git_Branch:
     amazon:
         <<: *linux-test-defaults
         build:

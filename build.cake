@@ -28,18 +28,18 @@ string nugetVersion;
 // SETUP / TEARDOWN
 ///////////////////////////////////////////////////////////////////////////////
 Setup(context =>
-{
+{/*
     gitVersionInfo = GitVersion(new GitVersionSettings {
         OutputType = GitVersionOutput.Json
     });
 
     if(BuildSystem.IsRunningOnTeamCity)
         BuildSystem.TeamCity.SetBuildNumber(gitVersionInfo.NuGetVersion);
-
-    nugetVersion = gitVersionInfo.NuGetVersion;
+*/
+    nugetVersion = "1.0.0-beta";
 
     Information("Building Sashimi v{0}", nugetVersion);
-    Information("Informational Version {0}", gitVersionInfo.InformationalVersion);
+    //Information("Informational Version {0}", gitVersionInfo.InformationalVersion);
 });
 
 Teardown(context =>
