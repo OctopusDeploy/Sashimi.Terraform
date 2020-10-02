@@ -3,11 +3,9 @@ FROM registry.suse.com/suse/sle15
 VOLUME /artifacts
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-RUN zypper -n install wget && \
-    wget https://packages.microsoft.com/config/sles/15/packages-microsoft-prod.rpm && \
-    rpm -Uvh packages-microsoft-prod.rpm && \
-    ln -s /etc/yum.repos.d/microsoft-prod.repo /etc/zypp/repos.d/microsoft-prod.repo && \
-    zypper -n install dotnet-sdk-3.1
+RUN zypper addrepo --check --refresh -p 70 --name "packages-microsoft-com-prod" https://packages.microsoft.com/sles/15/prod "packages-microsoft-com-prod" && \
+    zypper addrepo --check --refresh -p 71 --name "opensuse" http://download.opensuse.org/update/leap/15.1/oss/ "opensuse" && \
+    zypper -n --no-gpg-checks install libicu dotnet-sdk-3.1
 
 WORKDIR /artifacts
 
