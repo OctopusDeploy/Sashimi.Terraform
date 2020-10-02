@@ -1,12 +1,17 @@
 FROM registry.suse.com/suse/sle15
 
-VOLUME /artifacts
+VOLUME /publish
+# Don't call home
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+# Path to Calamari exe
+ENV CalamariBinaries_RelativePath=/publish/Calamari.Terraform/linux-x64
+# Forces CI
+ENV TEAMCITY_VERSION=1.2.3
 
 RUN zypper addrepo --check --refresh -p 70 --name "packages-microsoft-com-prod" https://packages.microsoft.com/sles/15/prod "packages-microsoft-com-prod" && \
     zypper addrepo --check --refresh -p 71 --name "opensuse" http://download.opensuse.org/update/leap/15.1/oss/ "opensuse" && \
     zypper -n --no-gpg-checks install libicu dotnet-sdk-3.1
 
-WORKDIR /artifacts
+WORKDIR /publish/Sashimi.Terraform.Tests
 
-ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter:"TestCategory != Windows" --logger:trx
+ENTRYPOINT ["dotnet", "vstest", "Sashimi.Terraform.Tests.dll", "--TestCaseFilter:TestCategory != Windows", "--logger:trx"]

@@ -1,84 +1,65 @@
 version: '3.8'
+
+x-linux-test-defaults: &linux-test-defaults
+    volumes:
+        - ../publish:/publish
+    environment:
+        AWS_E2E_AccessKeyId:
+        AWS_E2E_SecretKeyId:
+        Azure_OctopusAPITester_ClientId:
+        Azure_OctopusAPITester_Password:
+        Azure_OctopusAPITester_SubscriptionId:
+        Azure_OctopusAPITester_TenantId:
+
 services:
     build:
         build:
             context: .
             dockerfile: build-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-            Git_Branch: main
         volumes:
-            - C:/temp/artifacts:C:/artifacts
-            - ../:C:/build
+            - ../:C:/repoRoot
     amazon:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: amazon-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     centos:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: centOS-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     debian:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: debian-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     fedora:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: fedora-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     opensuse:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: openSUSE-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     rhel:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: rhel-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     sles:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: sles-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     ubuntu18:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: ubuntu18-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts
     ubuntu20:
+        <<: *linux-test-defaults
         build:
             context: .
             dockerfile: ubuntu20-Dockerfile
-        environment:
-            TEAMCITY_VERSION: 1.2.3
-        volumes:
-            - C:\Temp\artifacts\Sashimi.Terraform.Tests:/artifacts

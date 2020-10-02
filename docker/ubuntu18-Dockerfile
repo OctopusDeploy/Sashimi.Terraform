@@ -1,8 +1,17 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-bionic
 
-VOLUME /artifacts
+VOLUME /publish
+# Don't call home
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+# Path to Calamari exe
+ENV CalamariBinaries_RelativePath=/publish/Calamari.Terraform/linux-x64
+# Forces CI
+ENV TEAMCITY_VERSION=1.2.3
 
-WORKDIR /artifacts
+WORKDIR /Octopus
 
-ENTRYPOINT dotnet vstest Sashimi.Terraform.Tests.dll --TestCaseFilter:"TestCategory != Windows" --logger:trx
+COPY ./install.sh ./install.sh
+
+RUN chmod u+x ./install.sh
+
+ENTRYPOINT ["./install.sh"]
