@@ -60,7 +60,7 @@ namespace Sashimi.Terraform.CloudTemplates
 
         string? GetDefaultValue(HclElement argValue)
         {
-            return argValue.Children?.FirstOrDefault(child => child.Name == "default")?.Value;
+            return argValue.Children?.FirstOrDefault(child => child.Name == "default")?.ToString(true, 0);
         }
 
         string? GetDefaultDescription(HclElement argValue)
