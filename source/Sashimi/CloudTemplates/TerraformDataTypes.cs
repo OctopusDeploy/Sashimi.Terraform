@@ -26,7 +26,7 @@ namespace Sashimi.Terraform.CloudTemplates
         {
             if (terraformType == null) return DefaultType;
 
-            return TypeMap.Where(kv => kv.Key.StartsWith(terraformType))
+            return TypeMap.Where(kv => terraformType.StartsWith(kv.Key))
                    .Select(kv => kv.Value)
                    .FirstOrDefault()
                 ?? DefaultType;
