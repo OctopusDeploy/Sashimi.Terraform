@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.8
+
+RUN dotnet tool install --global Cake.Tool --version=0.38.2
+
+# Forces CI
+ENV TEAMCITY_VERSION=1.2.3
+# Make Gitversion happy
+ENV Git_Branch=main
+
+VOLUME C:/repoRoot
+
+WORKDIR C:/repoRoot
+
+ENTRYPOINT dotnet cake;

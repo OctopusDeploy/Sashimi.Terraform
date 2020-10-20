@@ -1,0 +1,21 @@
+FROM opensuse/leap:15.1
+
+VOLUME /publish
+# Don't call home
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+# Path to Calamari exe
+ENV CalamariBinaries_RelativePath=/publish/Calamari.Terraform/linux-x64
+# Forces CI
+ENV TEAMCITY_VERSION=1.2.3
+
+RUN zypper -n install libicu curl && \
+    curl -o /tmp/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc && \
+    rpm --import /tmp/microsoft.asc && \
+    curl -o prod.repo https://packages.microsoft.com/config/opensuse/15/prod.repo && \
+    mv prod.repo /etc/zypp/repos.d/microsoft-prod.repo && \
+    chown root:root /etc/zypp/repos.d/microsoft-prod.repo && \
+    zypper -n install dotnet-sdk-3.1
+
+WORKDIR /publish/Sashimi.Terraform.Tests
+
+ENTRYPOINT ["dotnet", "vstest", "Sashimi.Terraform.Tests.dll", "--TestCaseFilter:TestCategory != Windows", "--logger:trx"]
