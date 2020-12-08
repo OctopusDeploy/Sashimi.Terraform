@@ -69,7 +69,7 @@ class Build : NukeBuild
 
     Target Test => _ => _
         .DependsOn(Compile)
-        .OnlyWhenStatic(TeamCityExtensions.IsLocalBuild)
+        .OnlyWhenStatic(() => IsLocalBuild)
         .Executes(() =>
         {
             DotNetTest(s => s
@@ -164,7 +164,7 @@ class Build : NukeBuild
         .DependsOn(Test)
         .DependsOn(PackSashimi)
         .Unlisted()
-        .OnlyWhenStatic(TeamCityExtensions.IsLocalBuild)
+        .OnlyWhenStatic(() => IsLocalBuild)
         .Executes(() =>
         {
             EnsureExistingDirectory(LocalPackagesDirectory);
