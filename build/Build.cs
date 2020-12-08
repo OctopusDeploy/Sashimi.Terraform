@@ -153,7 +153,7 @@ class Build : NukeBuild
                 .SetProject(Solution)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetNoBuild(true) // Don't change this flag we need it because of https://github.com/dotnet/msbuild/issues/5566
+                .SetNoBuild(false) // Don't change this flag we need it because of https://github.com/dotnet/msbuild/issues/5566
                 .SetIncludeSource(true)
                 .SetVersion(GitVersion.NuGetVersion));
 
