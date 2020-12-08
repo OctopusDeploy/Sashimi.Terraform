@@ -26,6 +26,11 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
+    [Parameter("Internal Nuget Feed URL")]
+    readonly string InternalNugetFeedUrl;
+    [Parameter("Internal Nuget Feed URL ApiKey")]
+    readonly string InternalNugetFeedApiKey;
+
     [Solution] readonly Solution Solution;
     [GitVersion] readonly GitVersion GitVersion;
 
@@ -35,7 +40,6 @@ class Build : NukeBuild
     AbsolutePath LocalPackagesDirectory => RootDirectory / ".." / "LocalPackages";
 
     Target Clean => _ => _
-        .Before(Restore)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj", "**/TestResults").ForEach(DeleteDirectory);
@@ -157,16 +161,30 @@ class Build : NukeBuild
         });
 
     Target CopyToLocalPackages => _ => _
-       .DependsOn(Test)
-       .DependsOn(PackSashimi)
-       .OnlyWhenStatic(TeamCityExtensions.IsLocalBuild)
-       .Executes(() =>
+        .DependsOn(Test)
+        .DependsOn(PackSashimi)
+        .Unlisted()
+        .OnlyWhenStatic(TeamCityExtensions.IsLocalBuild)
+        .Executes(() =>
         {
             EnsureExistingDirectory(LocalPackagesDirectory);
             ArtifactsDirectory
                 .GlobFiles($"Sashimi.*.{GitVersion.NuGetVersion}.nupkg")
-                .ForEach(file => CopyFile(file, LocalPackagesDirectory / new FileInfo(file).Name));
+                .ForEach(sourceFile => CopyFile(sourceFile, LocalPackagesDirectory / Path.GetFileName(sourceFile)));
         });
+
+    Target Publish => _ => _
+        .Requires(() => InternalNugetFeedUrl)
+        .DependsOn(PackSashimi)
+        .Executes(() =>
+        {
+			DotNetNuGetPush(s => s
+		        .SetSource(InternalNugetFeedUrl)
+		        .SetTargetPath("*.nupkg")
+		        .SetApiKey(InternalNugetFeedApiKey)
+		        .SetTimeout(1200)
+		    );
+	});
 
     Target Default => _ => _
         .DependsOn(CopyToLocalPackages);
