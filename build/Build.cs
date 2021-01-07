@@ -178,13 +178,13 @@ class Build : NukeBuild
         .DependsOn(PackSashimi)
         .Executes(() =>
         {
-			DotNetNuGetPush(s => s
-		        .SetSource(InternalNugetFeedUrl)
-		        .SetTargetPath("*.nupkg")
-		        .SetApiKey(InternalNugetFeedApiKey)
-		        .SetTimeout(1200)
-		    );
-	});
+            DotNetNuGetPush(s => s
+                .SetSource(InternalNugetFeedUrl)
+                .SetTargetPath("*.nupkg")
+                .SetApiKey(InternalNugetFeedApiKey)
+                .SetTimeout(1200)
+            );
+    });
 
     Target Default => _ => _
         .DependsOn(CopyToLocalPackages);
