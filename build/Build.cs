@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.Execution;
@@ -85,10 +87,11 @@ class Build : NukeBuild
             var projects = SourceDirectory.GlobFiles("**/Calamari*.csproj"); //We need Calamari & Calamari.Tests
             foreach(var project in projects)
             {
-                var calamariFlavour = Xml.XmlPeek(project, "Project/PropertyGroup/AssemblyName");
 
-                var frameworks = Xml.XmlPeek(project, "Project/PropertyGroup/TargetFrameworks") ??
-                                 Xml.XmlPeek(project, "Project/PropertyGroup/TargetFramework");
+                var calamariFlavour = XmlTasks.XmlPeekSingle(project, "Project/PropertyGroup/AssemblyName");
+
+                var frameworks = XmlTasks.XmlPeekSingle(project, "Project/PropertyGroup/TargetFrameworks") ??
+                                 XmlTasks.XmlPeekSingle(project, "Project/PropertyGroup/TargetFramework");
 
                 foreach(var framework in frameworks.Split(';'))
                 {
@@ -104,13 +107,20 @@ class Build : NukeBuild
 
                     if(framework.StartsWith("netcoreapp"))
                     {
-                        var runtimes = Xml.XmlPeek(project, "Project/PropertyGroup/RuntimeIdentifiers").Split(';');
+                        var runtimes = XmlTasks.XmlPeekSingle(project, "Project/PropertyGroup/RuntimeIdentifiers")?.Split(';');
                         foreach(var runtime in runtimes)
                             RunPublish(runtime, runtime);
                     }
                     else
                     {
-                        RunPublish(null, "netfx");
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            RunPublish(null, "netfx");
+                        }
+                        else
+                        {
+                            Logger.Warn($"Skipping building {framework} - can't build netfx on non Windows OS");
+                        }
                     }
                 }
                 Logger.Trace($"{PublishDirectory}/{calamariFlavour}");
@@ -125,7 +135,7 @@ class Build : NukeBuild
             var projects = SourceDirectory.GlobFiles("**/Sashimi.Tests.csproj");
             foreach(var project in projects)
             {
-                var sashimiFlavour = Xml.XmlPeek(project, "Project/PropertyGroup/AssemblyName");
+                var sashimiFlavour = XmlTasks.XmlPeekSingle(project, "Project/PropertyGroup/AssemblyName");
 
                 DotNetPublish(s => s
                     .SetProject(project)
@@ -173,6 +183,7 @@ class Build : NukeBuild
                 .ForEach(sourceFile => CopyFile(sourceFile, LocalPackagesDirectory / Path.GetFileName(sourceFile)));
         });
 
+    [PublicAPI]
     Target Publish => _ => _
         .Requires(() => InternalNugetFeedUrl)
         .DependsOn(PackSashimi)
