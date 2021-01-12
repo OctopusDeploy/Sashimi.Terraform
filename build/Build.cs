@@ -150,13 +150,6 @@ class Build : NukeBuild
     Target PackSashimi => _ => _
         .DependsOn(PublishSashimiTestProjects)
         .DependsOn(PublishCalamariProjects)
-        .Produces
-        (
-            ArtifactsDirectory / "Calamari.Terraform.Tests.zip",
-            ArtifactsDirectory / "Calamari.Terraform.zip",
-            ArtifactsDirectory / "Sashimi.Terraform.{GitVersion.NuGetVersion}.nupkg",
-            ArtifactsDirectory / "Sashimi.Terraform.Tests.zip"
-        )
         .Executes(() =>
         {
             DotNetPack(s => s
