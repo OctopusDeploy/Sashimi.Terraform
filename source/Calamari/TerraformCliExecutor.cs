@@ -30,6 +30,7 @@ namespace Calamari.Terraform
         readonly string logPath;
         Dictionary<string, string> defaultEnvironmentVariables;
         readonly Version version;
+        readonly DisposableDirectory disposableDirectory = new();
 
         readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("0.15"), true);
 
@@ -48,6 +49,15 @@ namespace Calamari.Terraform
             variables = deployment.Variables;
             this.environmentVariables = environmentVariables;
             logPath = Path.Combine(deployment.CurrentDirectory, "terraform.log");
+            
+            /*
+             * https://golang.org/pkg/os/#TempDir
+             * On Unix systems, it returns $TMPDIR if non-empty, else /tmp. On Windows,
+             * it uses GetTempPath, returning the first non-empty value from %TMP%,
+             * %TEMP%, %USERPROFILE%, or the Windows directory. On Plan 9, it returns /tmp. 
+             */
+            this.environmentVariables["TEMP"] = disposableDirectory.DirectoryName;
+            this.environmentVariables["TMPDIR"] = disposableDirectory.DirectoryName;
 
             templateDirectory = variables.Get(TerraformSpecialVariables.Action.Terraform.TemplateDirectory, deployment.CurrentDirectory);
 
@@ -128,6 +138,7 @@ namespace Calamari.Terraform
                 if (fileSystem.FileExists(crashLogPath))
                     log.NewOctopusArtifact(fileSystem.GetFullPath(crashLogPath), fileSystem.GetFileName(crashLogPath), fileSystem.GetFileSize(crashLogPath));
             }
+            disposableDirectory.Dispose();
         }
 
         CommandResult ExecuteCommandInternal(string[] arguments, out string result, bool outputToCalamariConsole)
