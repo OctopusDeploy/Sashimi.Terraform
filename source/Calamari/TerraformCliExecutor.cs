@@ -30,7 +30,7 @@ namespace Calamari.Terraform
         readonly string logPath;
         Dictionary<string, string> defaultEnvironmentVariables;
         readonly Version version;
-        readonly DisposableDirectory disposableDirectory = new();
+        readonly TemporaryDirectory disposableDirectory = TemporaryDirectory.Create();
 
         readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("0.15"), true);
 
@@ -56,8 +56,8 @@ namespace Calamari.Terraform
              * it uses GetTempPath, returning the first non-empty value from %TMP%,
              * %TEMP%, %USERPROFILE%, or the Windows directory. On Plan 9, it returns /tmp. 
              */
-            this.environmentVariables["TEMP"] = disposableDirectory.DirectoryName;
-            this.environmentVariables["TMPDIR"] = disposableDirectory.DirectoryName;
+            this.environmentVariables["TEMP"] = disposableDirectory.DirectoryPath;
+            this.environmentVariables["TMPDIR"] = disposableDirectory.DirectoryPath;
 
             templateDirectory = variables.Get(TerraformSpecialVariables.Action.Terraform.TemplateDirectory, deployment.CurrentDirectory);
 
