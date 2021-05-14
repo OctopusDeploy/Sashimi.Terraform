@@ -5,10 +5,6 @@ namespace Calamari.Terraform.Helpers
 {
     public class DisposableDirectory : IDisposable
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TempStorage"/> class.
-        /// </summary>
-        /// <param name="path">The path to use as temp storage.</param>
         public DisposableDirectory()
         {
             DirectoryName = Create();
