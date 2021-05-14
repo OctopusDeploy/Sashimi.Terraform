@@ -19,6 +19,9 @@ namespace Calamari.Terraform.Helpers
         string Create()
         {
             var tempDirectory = Path.GetTempFileName();
+            // .NET ensures the name is unique, but we want a folder
+            File.Delete(tempDirectory);
+            // Create a folder instead
             Directory.CreateDirectory(tempDirectory);
             return tempDirectory;
         }
