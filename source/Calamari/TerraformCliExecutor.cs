@@ -49,13 +49,14 @@ namespace Calamari.Terraform
             variables = deployment.Variables;
             this.environmentVariables = environmentVariables;
             logPath = Path.Combine(deployment.CurrentDirectory, "terraform.log");
-            
+
             /*
              * https://golang.org/pkg/os/#TempDir
              * On Unix systems, it returns $TMPDIR if non-empty, else /tmp. On Windows,
              * it uses GetTempPath, returning the first non-empty value from %TMP%,
-             * %TEMP%, %USERPROFILE%, or the Windows directory. On Plan 9, it returns /tmp. 
+             * %TEMP%, %USERPROFILE%, or the Windows directory. On Plan 9, it returns /tmp.
              */
+            this.environmentVariables["TMP"] = disposableDirectory.DirectoryPath;
             this.environmentVariables["TEMP"] = disposableDirectory.DirectoryPath;
             this.environmentVariables["TMPDIR"] = disposableDirectory.DirectoryPath;
 
@@ -171,7 +172,7 @@ namespace Calamari.Terraform
             var initParams = variables.Get(TerraformSpecialVariables.Action.Terraform.AdditionalInitParams);
             var allowPluginDownloads = variables.GetFlag(TerraformSpecialVariables.Action.Terraform.AllowPluginDownloads, true);
             string initCommand = $"init -no-color";
-            
+
             if (version.IsLessThan("0.15.0"))
                 initCommand += $" -get-plugins={allowPluginDownloads.ToString().ToLower()}";
 
