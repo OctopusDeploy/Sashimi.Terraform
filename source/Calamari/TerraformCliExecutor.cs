@@ -51,6 +51,12 @@ namespace Calamari.Terraform
             logPath = Path.Combine(deployment.CurrentDirectory, "terraform.log");
 
             /*
+             * Terraform has an issue where it will not clean up temporary files created while downloading
+             * providers: https://github.com/hashicorp/terraform/issues/28477
+             *
+             * By overriding the temporary directory and cleaning it up when Calamari is done,
+             * we can work around the the issue.
+             *
              * https://golang.org/pkg/os/#TempDir
              * On Unix systems, it returns $TMPDIR if non-empty, else /tmp. On Windows,
              * it uses GetTempPath, returning the first non-empty value from %TMP%,
