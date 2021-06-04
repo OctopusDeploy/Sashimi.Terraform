@@ -79,7 +79,7 @@ namespace Calamari.Terraform.Behaviours
                 var bytes = Convert.FromBase64String(keyFile);
                 var json = Encoding.UTF8.GetString(bytes);
                 googleCloudEnvironmentVariables.Add("GOOGLE_CLOUD_KEYFILE_JSON", json);
-                Log.Verbose($"JSON key has been set to GOOGLE_CLOUD_KEYFILE_JSON environment variable");
+                Log.Verbose($"A JSON key has been set to GOOGLE_CLOUD_KEYFILE_JSON environment variable");
             }
 
             var impersonateServiceAccount = variables.GetFlag("Octopus.Action.GoogleCloud.ImpersonateServiceAccount");
@@ -103,13 +103,13 @@ namespace Calamari.Terraform.Behaviours
             if (!string.IsNullOrEmpty(region))
             {
                 googleCloudEnvironmentVariables.Add("GOOGLE_REGION", region);
-                Log.Verbose($"{project} has been set to GOOGLE_REGION environment variable");
+                Log.Verbose($"{region} has been set to GOOGLE_REGION environment variable");
             }
             
             if (!string.IsNullOrEmpty(zone))
             {
-                googleCloudEnvironmentVariables.Add("GOOGLE_ZONE", project);
-                Log.Verbose($"{project} has been set to GOOGLE_ZONE environment variable");
+                googleCloudEnvironmentVariables.Add("GOOGLE_ZONE", zone);
+                Log.Verbose($"{zone} has been set to GOOGLE_ZONE environment variable");
             }
             
             return googleCloudEnvironmentVariables;
