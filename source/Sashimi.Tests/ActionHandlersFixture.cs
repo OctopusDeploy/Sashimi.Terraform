@@ -27,7 +27,7 @@ using TestEnvironment = Sashimi.Tests.Shared.TestEnvironment;
 namespace Sashimi.Terraform.Tests
 {
     [TestFixture(BundledCliFixture.TerraformVersion)]
-    [TestFixture("0.15.6")]
+    [TestFixture("0.15.5")]
     public class ActionHandlersFixture
     {
         string? customTerraformExecutable;
