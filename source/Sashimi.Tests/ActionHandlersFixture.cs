@@ -860,7 +860,7 @@ output ""config-map-aws-auth"" {{
             if (terraformCliVersionAsObject.CompareTo(_minimumVersion) < 0
                 || terraformCliVersionAsObject.CompareTo(_maximumVersion) >= 0)
             {
-                Assert.Ignore();
+                Assert.Ignore($"Test ignored as terraform version is not between {_minimumVersion} and {_maximumVersion}");
             }
         }
     }

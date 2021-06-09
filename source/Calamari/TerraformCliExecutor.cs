@@ -31,7 +31,7 @@ namespace Calamari.Terraform
         Dictionary<string, string> defaultEnvironmentVariables;
         readonly Version version;
 
-        readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("1.0"), true);
+        readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("1.1"), false);
 
         public TerraformCliExecutor(
             ILog log,
@@ -190,7 +190,7 @@ namespace Calamari.Terraform
             else
             {
                 if (!supportedVersionRange.Satisfies(new NuGetVersion(version)))
-                    log.Warn($"Version {consoleOutput} of Terraform CLI is not supported. Supported version range is: {supportedVersionRange}");
+                    log.Warn($"Version {consoleOutput} of Terraform CLI is not supported. The supported version range is: {supportedVersionRange}. Terraform commands may work successfully however version {consoleOutput} is not tested.");
             }
 
             return version;
