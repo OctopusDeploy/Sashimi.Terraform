@@ -27,7 +27,7 @@ using TestEnvironment = Sashimi.Tests.Shared.TestEnvironment;
 namespace Sashimi.Terraform.Tests
 {
     [TestFixture(BundledCliFixture.TerraformVersion)]
-    [TestFixture("0.15.5")]
+    [TestFixture("1.0.0")]
     public class ActionHandlersFixture
     {
         string? customTerraformExecutable;
@@ -835,7 +835,7 @@ output ""config-map-aws-auth"" {{
             if (terraformCliVersionAsObject.CompareTo(minimumVersion) < 0
                 || terraformCliVersionAsObject.CompareTo(maximumVersion) >= 0)
             {
-                Assert.Ignore();
+                Assert.Ignore($"Test ignored as terraform version is not between {minimumVersion} and {maximumVersion}");
             }
         }
     }
