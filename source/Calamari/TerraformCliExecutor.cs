@@ -190,7 +190,10 @@ namespace Calamari.Terraform
             else
             {
                 if (!supportedVersionRange.Satisfies(new NuGetVersion(version)))
-                    log.Warn($"Version {consoleOutput} of Terraform CLI has not been tested and is not supported, however Terraform commands may work successfully with this version. The supported version range is: {supportedVersionRange}.");
+                {
+                    var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
+                    log.Warn($"{messageCode}: Terraform steps are tested against versions {supportedVersionRange} of the Terraform CLI. Version {consoleOutput} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Learn more about Terraform CLI versions at {log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}");
+                }
             }
 
             return version;
