@@ -192,7 +192,7 @@ namespace Calamari.Terraform
                 if (!supportedVersionRange.Satisfies(new NuGetVersion(version)))
                 {
                     var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
-                    log.Warn($"Terraform steps are tested against versions {supportedVersionRange.MinVersion.ToNormalizedString()} to {supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {consoleOutput} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Learn more about Terraform CLI versions at {log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}");
+                    log.Warn($"Terraform steps are tested against versions {(supportedVersionRange.IsMinInclusive ? "> " : "")}{supportedVersionRange.MinVersion.ToNormalizedString()} to {(supportedVersionRange.IsMaxInclusive ? "" : "< ")}{supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {consoleOutput} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Learn more about Terraform CLI versions at {log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}");
                 }
             }
 
