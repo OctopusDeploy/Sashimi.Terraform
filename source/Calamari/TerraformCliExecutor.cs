@@ -31,7 +31,7 @@ namespace Calamari.Terraform
         Dictionary<string, string> defaultEnvironmentVariables;
         readonly Version version;
 
-        readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("1.1"), false);
+        readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("0.16"), false);
 
         public TerraformCliExecutor(
             ILog log,
@@ -192,7 +192,7 @@ namespace Calamari.Terraform
                 if (!supportedVersionRange.Satisfies(new NuGetVersion(version)))
                 {
                     var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
-                    log.Warn($"{messageCode}: Terraform steps are tested against versions {supportedVersionRange.MinVersion.ToNormalizedString()} to {supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {consoleOutput} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Learn more about Terraform CLI versions at {log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}");
+                    log.Warn($"Terraform steps are tested against versions {supportedVersionRange.MinVersion.ToNormalizedString()} to {supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {consoleOutput} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Learn more about Terraform CLI versions at {log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}");
                 }
             }
 
