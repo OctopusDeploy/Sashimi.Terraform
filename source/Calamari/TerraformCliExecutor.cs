@@ -32,7 +32,7 @@ namespace Calamari.Terraform
         readonly Version version;
         bool haveLoggedUntestedVersionInfoMessage = false;
 
-        readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("1.1"), false);
+        readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("1.0"), false);
 
         public TerraformCliExecutor(
             ILog log,
@@ -147,7 +147,7 @@ namespace Calamari.Terraform
                 {
                     log.Warn(message);
                 }
-                else if (!haveLoggedUntestedVersionInfoMessage) // Only want to log an info message once, not on every command
+                else
                 {
                     log.Info(message);
                     haveLoggedUntestedVersionInfoMessage = true;
