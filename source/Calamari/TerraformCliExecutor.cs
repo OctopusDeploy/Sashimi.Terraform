@@ -30,6 +30,7 @@ namespace Calamari.Terraform
         readonly string logPath;
         Dictionary<string, string> defaultEnvironmentVariables;
         readonly Version version;
+        bool haveLoggedUntestedVersionInfoMessage = false;
 
         readonly VersionRange supportedVersionRange = new VersionRange(NuGetVersion.Parse("0.11.15"), true, NuGetVersion.Parse("1.1"), false);
 
@@ -152,7 +153,27 @@ namespace Calamari.Terraform
 
             result = string.Join("\n", captureOutput.Infos);
 
+            LogUntestedVersionMessageIfNeeded(commandResult);
+
             return commandResult;
+        }
+
+        void LogUntestedVersionMessageIfNeeded(CommandResult commandResult)
+        {
+            if (this.version != null && !supportedVersionRange.Satisfies(new NuGetVersion(version)))
+            {
+                var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
+                var message = $"{log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}: Terraform steps are tested against versions {(supportedVersionRange.IsMinInclusive ? "" : ">")}{supportedVersionRange.MinVersion.ToNormalizedString()} to {(supportedVersionRange.IsMaxInclusive ? "" : "<")}{supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {version} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Click the error code link for more information.";
+                if (commandResult.ExitCode != 0)
+                {
+                    log.Warn(message);
+                }
+                else if (!haveLoggedUntestedVersionInfoMessage) // Only want to log an info message once, not on every command
+                {
+                    log.Info(message);
+                    haveLoggedUntestedVersionInfoMessage = true;
+                }
+            }
         }
 
         void InitializePlugins()
@@ -186,14 +207,6 @@ namespace Calamari.Terraform
             if (!Version.TryParse(consoleOutput, out var version))
             {
                 log.Warn($"Could not determine Terraform CLI version.");
-            }
-            else
-            {
-                if (!supportedVersionRange.Satisfies(new NuGetVersion(version)))
-                {
-                    var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
-                    log.Warn($"{log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}: Terraform steps are tested against versions {(supportedVersionRange.IsMinInclusive ? "" : ">")}{supportedVersionRange.MinVersion.ToNormalizedString()} to {(supportedVersionRange.IsMaxInclusive ? "" : "<")}{supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {consoleOutput} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Click the error code link for more information.");
-                }
             }
 
             return version;
