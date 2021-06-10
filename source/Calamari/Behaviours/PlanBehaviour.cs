@@ -43,13 +43,7 @@ namespace Calamari.Terraform.Behaviours
                 var resultCode = commandResult.ExitCode;
 
                 if (resultCode == 1)
-                {
-                    // exit code of 1 indicates error, whereas 2 is not an error instead it is changes would be applied
-                    // Log untested version and verify success to throw out
-                    cli.LogUntestedVersionMessageIfNeeded(commandResult);
-                    commandResult.VerifySuccess();
-                }
-
+                    cli.VerifySuccess(commandResult);
 
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanDetailedExitCode}' with the detailed exit code of the plan, with value '{resultCode}'.");

@@ -94,24 +94,17 @@ namespace Calamari.Terraform
 
         public CommandResult ExecuteCommand(params string[] arguments)
         {
-            var commandResult = ExecuteCommandInternal(arguments, out var result, true);
-
-            commandResult.VerifySuccess();
-            return commandResult;
+            return ExecuteCommandAndVerifySuccess(arguments, out var result, true);
         }
 
         public CommandResult ExecuteCommand(out string result, params string[] arguments)
         {
-            var commandResult = ExecuteCommandInternal(arguments, out result, true, false);
-
-            return commandResult;
+            return ExecuteCommand(out result, true, arguments);
         }
 
         public CommandResult ExecuteCommand(out string result, bool outputToCalamariConsole, params string[] arguments)
         {
-            var commandResult = ExecuteCommandInternal(arguments, out result, outputToCalamariConsole);
-
-            return commandResult;
+            return ExecuteCommandInternal(arguments, out result, outputToCalamariConsole);
         }
 
         public void Dispose()
@@ -131,7 +124,13 @@ namespace Calamari.Terraform
             }
         }
 
-        public void LogUntestedVersionMessageIfNeeded(CommandResult commandResult)
+        public void VerifySuccess(CommandResult commandResult)
+        {
+            LogUntestedVersionMessageIfNeeded(commandResult);
+            commandResult.VerifySuccess();
+        }
+
+        void LogUntestedVersionMessageIfNeeded(CommandResult commandResult)
         {
             if (this.version != null && !supportedVersionRange.Satisfies(new NuGetVersion(version)))
             {
@@ -149,7 +148,14 @@ namespace Calamari.Terraform
             }
         }
 
-        CommandResult ExecuteCommandInternal(string[] arguments, out string result, bool outputToCalamariConsole, bool logUntestedVersionMessageIfNeeded = true)
+        CommandResult ExecuteCommandAndVerifySuccess(string[] arguments, out string result, bool outputToCalamariConsole)
+        {
+            var commandResult = ExecuteCommandInternal(arguments, out result, outputToCalamariConsole);
+            VerifySuccess(commandResult);
+            return commandResult;
+        }
+
+        CommandResult ExecuteCommandInternal(string[] arguments, out string result, bool outputToCalamariConsole)
         {
             var environmentVar = defaultEnvironmentVariables;
             if (environmentVariables != null)
@@ -171,9 +177,6 @@ namespace Calamari.Terraform
 
             result = string.Join("\n", captureOutput.Infos);
 
-            if (logUntestedVersionMessageIfNeeded)
-                LogUntestedVersionMessageIfNeeded(commandResult);
-
             return commandResult;
         }
 
@@ -188,17 +191,12 @@ namespace Calamari.Terraform
 
             initCommand += $" {initParams}";
 
-            ExecuteCommandInternal(
-                                   new[] { initCommand },
-                                   out _,
-                                   true)
-                .VerifySuccess();
+            ExecuteCommandAndVerifySuccess(new[] { initCommand }, out _, true);
         }
 
         Version GetVersion()
         {
-            ExecuteCommandInternal(new[] { "--version" }, out string consoleOutput, true)
-                .VerifySuccess();
+            ExecuteCommandAndVerifySuccess(new[] { "--version" }, out string consoleOutput, true);
 
             consoleOutput = consoleOutput.Replace("Terraform v", "");
             int newLinePos = consoleOutput.IndexOf('\n'); // this is always \n in all OSes for unknown reasons
@@ -219,19 +217,19 @@ namespace Calamari.Terraform
 
             if (!string.IsNullOrWhiteSpace(workspace))
             {
-                ExecuteCommandInternal(new[] { "workspace list" }, out var results, true).VerifySuccess();
+                ExecuteCommandAndVerifySuccess(new[] { "workspace list" }, out var results, true);
 
                 foreach (var line in results.Split('\n'))
                 {
                     var workspaceName = line.Trim('*', ' ');
                     if (workspaceName.Equals(workspace))
                     {
-                        ExecuteCommandInternal(new[] { $"workspace select \"{workspace}\"" }, out _, true).VerifySuccess();
+                        ExecuteCommandAndVerifySuccess(new[] { $"workspace select \"{workspace}\"" }, out _, true);
                         return;
                     }
                 }
 
-                ExecuteCommandInternal(new[] { $"workspace new \"{workspace}\"" }, out _, true).VerifySuccess();
+                ExecuteCommandAndVerifySuccess(new[] { $"workspace new \"{workspace}\"" }, out _, true);
             }
         }
 
