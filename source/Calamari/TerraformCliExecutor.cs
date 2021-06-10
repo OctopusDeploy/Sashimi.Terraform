@@ -128,11 +128,11 @@ namespace Calamari.Terraform
         {
             LogUntestedVersionMessageIfNeeded(commandResult, isSuccess);
 
-            if (!isSuccess(commandResult))
+            if (isSuccess == null || !isSuccess(commandResult))
                 commandResult.VerifySuccess();
         }
 
-        void VerifySuccess(CommandResult commandResult)
+        public void VerifySuccess(CommandResult commandResult)
         {
             VerifySuccess(commandResult, r => r.ExitCode == 0);
         }
@@ -143,7 +143,7 @@ namespace Calamari.Terraform
             {
                 var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
                 var message = $"{log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}: Terraform steps are tested against versions {(supportedVersionRange.IsMinInclusive ? "" : ">")}{supportedVersionRange.MinVersion.ToNormalizedString()} to {(supportedVersionRange.IsMaxInclusive ? "" : "<")}{supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {version} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Click the error code link for more information.";
-                if (!isSuccess(commandResult))
+                if (isSuccess == null || !isSuccess(commandResult))
                 {
                     log.Warn(message);
                 }
