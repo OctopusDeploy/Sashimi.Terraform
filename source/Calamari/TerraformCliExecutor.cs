@@ -124,19 +124,26 @@ namespace Calamari.Terraform
             }
         }
 
-        public void VerifySuccess(CommandResult commandResult)
+        public void VerifySuccess(CommandResult commandResult, Predicate<CommandResult> isSuccess)
         {
-            LogUntestedVersionMessageIfNeeded(commandResult);
-            commandResult.VerifySuccess();
+            LogUntestedVersionMessageIfNeeded(commandResult, isSuccess);
+
+            if (!isSuccess(commandResult))
+                commandResult.VerifySuccess();
         }
 
-        void LogUntestedVersionMessageIfNeeded(CommandResult commandResult)
+        void VerifySuccess(CommandResult commandResult)
+        {
+            VerifySuccess(commandResult, r => r.ExitCode == 0);
+        }
+
+        void LogUntestedVersionMessageIfNeeded(CommandResult commandResult, Predicate<CommandResult> isSuccess)
         {
             if (this.version != null && !supportedVersionRange.Satisfies(new NuGetVersion(version)))
             {
                 var messageCode = "Terraform-Configuration-UntestedTerraformCLIVersion";
                 var message = $"{log.FormatLink($"https://g.octopushq.com/Terraform#{messageCode.ToLower()}", messageCode)}: Terraform steps are tested against versions {(supportedVersionRange.IsMinInclusive ? "" : ">")}{supportedVersionRange.MinVersion.ToNormalizedString()} to {(supportedVersionRange.IsMaxInclusive ? "" : "<")}{supportedVersionRange.MaxVersion.ToNormalizedString()} of the Terraform CLI. Version {version} of Terraform CLI has not been tested, however Terraform commands may work successfully with this version. Click the error code link for more information.";
-                if (commandResult.ExitCode != 0)
+                if (!isSuccess(commandResult))
                 {
                     log.Warn(message);
                 }
