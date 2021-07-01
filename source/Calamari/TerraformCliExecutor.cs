@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Calamari.Common.Commands;
 using Calamari.Common.Features.Processes;
@@ -14,7 +15,10 @@ using Calamari.Common.Plumbing.Logging;
 using Calamari.Common.Plumbing.Proxies;
 using Calamari.Common.Plumbing.Variables;
 using Calamari.Terraform.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NuGet.Versioning;
+using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
 
 namespace Calamari.Terraform
 {
@@ -201,17 +205,38 @@ namespace Calamari.Terraform
             ExecuteCommandAndVerifySuccess(new[] { initCommand }, out _, true);
         }
 
+        class TerraformVersion
+        {
+            [JsonProperty("terraform_version")]
+            public string Version { get; set; }
+        }
+
         Version GetVersion()
         {
-            ExecuteCommandAndVerifySuccess(new[] { "--version" }, out string consoleOutput, true);
+            ExecuteCommandAndVerifySuccess(new[] { "version --json" }, out string consoleOutput, true);
 
             Version parsedVersion = null;
-            var versionString = Regex.Match(consoleOutput, @"Terraform v([0-9\.]*)");
-            if (versionString.Success 
-                && versionString.Groups.Count > 1 
-                && !Version.TryParse(versionString.Groups[1].Value, out parsedVersion))
+            bool hasParsingFailed = false;
+            var versionJsonOutput = JsonConvert.DeserializeObject<TerraformVersion>(consoleOutput,  new JsonSerializerSettings
             {
-                log.Warn($"Could not parse Terraform CLI version. This might indicate you are using a version that is not supported or that an unexpected output was received from Terraform CLI.");
+                // this prevents NewtonsoftJson from throwing an exception
+                Error = delegate(object sender, ErrorEventArgs args)
+                        {
+                            hasParsingFailed = true;
+                            args.ErrorContext.Handled = true;
+                        }
+            });
+            
+            if (hasParsingFailed || !Version.TryParse(versionJsonOutput.Version, out parsedVersion))
+            {
+                // fallback to regex match for older versions
+                var versionString = Regex.Match(consoleOutput, @"Terraform v([0-9\.]*)");
+                if (versionString.Success
+                    && versionString.Groups.Count > 1
+                    && !Version.TryParse(versionString.Groups[1].Value, out parsedVersion))
+                {
+                    log.Warn($"Could not parse Terraform CLI version. This might indicate you are using a version that is not supported or that an unexpected output was received from Terraform CLI.");
+                }
             }
 
             return parsedVersion;
