@@ -15,7 +15,6 @@ using Calamari.Common.Plumbing.Variables;
 using Calamari.Terraform.Helpers;
 using Newtonsoft.Json;
 using NuGet.Versioning;
-using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
 
 namespace Calamari.Terraform
 {
@@ -214,10 +213,10 @@ namespace Calamari.Terraform
 
             Version parsedVersion = null;
             bool hasParsingFailed = false;
-            var versionJsonOutput = JsonConvert.DeserializeObject<TerraformVersionCommandOutput>(consoleOutput,  new JsonSerializerSettings
+            var versionJsonOutput = JsonConvert.DeserializeObject<TerraformVersionCommandOutput>(consoleOutput, new JsonSerializerSettings
             {
                 // this prevents NewtonsoftJson from throwing an exception
-                Error = delegate(object sender, ErrorEventArgs args)
+                Error = (sender, args) =>
                         {
                             hasParsingFailed = true;
                             args.ErrorContext.Handled = true;
