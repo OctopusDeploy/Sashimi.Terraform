@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Calamari.Common.Commands;
 using Calamari.Common.Features.Processes;
@@ -16,7 +14,6 @@ using Calamari.Common.Plumbing.Proxies;
 using Calamari.Common.Plumbing.Variables;
 using Calamari.Terraform.Helpers;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using NuGet.Versioning;
 using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
 
