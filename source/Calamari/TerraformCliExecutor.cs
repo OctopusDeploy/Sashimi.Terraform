@@ -193,7 +193,7 @@ namespace Calamari.Terraform
             var allowPluginDownloads = variables.GetFlag(TerraformSpecialVariables.Action.Terraform.AllowPluginDownloads, true);
             string initCommand = $"init -no-color";
 
-            if (version.IsLessThan("0.15.0"))
+            if (version?.IsLessThan("0.15.0") == true)
                 initCommand += $" -get-plugins={allowPluginDownloads.ToString().ToLower()}";
 
             initCommand += $" {initParams}";
@@ -205,17 +205,16 @@ namespace Calamari.Terraform
         {
             ExecuteCommandAndVerifySuccess(new[] { "--version" }, out string consoleOutput, true);
 
-            consoleOutput = consoleOutput.Replace("Terraform v", "");
-            int newLinePos = consoleOutput.IndexOf('\n'); // this is always \n in all OSes for unknown reasons
-            if (newLinePos != -1)
-                consoleOutput = consoleOutput.Substring(0, newLinePos);
-
-            if (!Version.TryParse(consoleOutput, out var version))
+            Version parsedVersion = null;
+            var versionString = Regex.Match(consoleOutput, @"Terraform v([0-9\.]*)");
+            if (versionString.Success 
+                && versionString.Groups.Count > 1 
+                && !Version.TryParse(versionString.Groups[1].Value, out parsedVersion))
             {
-                log.Warn($"Could not determine Terraform CLI version.");
+                log.Warn($"Could not parse Terraform CLI version. This might indicate you are using a version that is not supported or that an unexpected output was received from Terraform CLI.");
             }
 
-            return version;
+            return parsedVersion;
         }
 
         void InitializeWorkspace()
