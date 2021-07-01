@@ -202,7 +202,7 @@ namespace Calamari.Terraform
             ExecuteCommandAndVerifySuccess(new[] { initCommand }, out _, true);
         }
 
-        class TerraformVersion
+        class TerraformVersionCommandOutput
         {
             [JsonProperty("terraform_version")]
             public string Version { get; set; }
@@ -214,7 +214,7 @@ namespace Calamari.Terraform
 
             Version parsedVersion = null;
             bool hasParsingFailed = false;
-            var versionJsonOutput = JsonConvert.DeserializeObject<TerraformVersion>(consoleOutput,  new JsonSerializerSettings
+            var versionJsonOutput = JsonConvert.DeserializeObject<TerraformVersionCommandOutput>(consoleOutput,  new JsonSerializerSettings
             {
                 // this prevents NewtonsoftJson from throwing an exception
                 Error = delegate(object sender, ErrorEventArgs args)
