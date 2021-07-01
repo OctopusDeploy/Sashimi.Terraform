@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 using Octopus.CoreUtilities;
+using Octopus.Server.Extensibility.HostServices.Diagnostics;
 using Sashimi.Server.Contracts;
 using Sashimi.Server.Contracts.ActionHandlers;
 using Sashimi.Server.Contracts.Calamari;
 using Sashimi.Server.Contracts.CloudTemplates;
+using Sashimi.Server.Contracts.Variables;
 using Sashimi.Terraform.CloudTemplates;
 
 namespace Sashimi.Terraform.ActionHandler
@@ -33,7 +38,7 @@ namespace Sashimi.Terraform.ActionHandler
         public bool CanRunOnDeploymentTarget => false;
         public ActionHandlerCategory[] Categories => new[] { ActionHandlerCategory.BuiltInStep, ActionHandlerCategory.Terraform };
 
-        public IActionHandlerResult Execute(IActionHandlerContext context)
+        public IActionHandlerResult Execute(IActionHandlerContext context, ITaskLog taskLog)
         {
             var builder = context.CalamariCommand(CalamariTerraform, ToolCommand);
 
@@ -49,12 +54,18 @@ namespace Sashimi.Terraform.ActionHandler
             {
                 var template = context.Variables.Get(TerraformSpecialVariables.Action.Terraform.Template);
                 var templateParametersRaw = context.Variables.GetRaw(TerraformSpecialVariables.Action.Terraform.TemplateParameters);
+                var userDefinedEnvVariables = GetEnvironmentVariableArgs(context.Variables);
 
                 if (string.IsNullOrEmpty(template))
                     throw new KnownDeploymentFailureException("No template supplied");
 
                 if (string.IsNullOrEmpty(templateParametersRaw))
-                    throw new KnownDeploymentFailureException("No template parameters applied");
+                {
+                    if (!AnyEnvironmentVariablesContainTerraformVars(userDefinedEnvVariables))
+                        throw new KnownDeploymentFailureException("No template parameters applied");
+
+                    templateParametersRaw = "{}";
+                }
 
                 var templateHandler = cloudTemplateHandlerFactory.GetHandler(TerraformConstants.CloudTemplateProviderId, template);
 
@@ -75,7 +86,21 @@ namespace Sashimi.Terraform.ActionHandler
                                          );
             }
 
-            return builder.Execute();
+            return builder.Execute(taskLog);
+        }
+
+        static bool AnyEnvironmentVariablesContainTerraformVars(Dictionary<string,string> userDefinedEnvVariables)
+        {
+            return userDefinedEnvVariables.Keys.Any(x => x.StartsWith("TF_VAR_"));
+        }
+
+        static Dictionary<string, string> GetEnvironmentVariableArgs(IActionAndTargetScopedVariables variables)
+        {
+            var rawJson = variables.Get(TerraformSpecialVariables.Action.Terraform.EnvironmentVariables);
+            if (string.IsNullOrEmpty(rawJson))
+                return new Dictionary<string, string>();
+
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(rawJson);
         }
     }
 }

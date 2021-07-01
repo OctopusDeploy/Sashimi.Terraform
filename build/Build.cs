@@ -23,7 +23,7 @@ class Build : NukeBuild
     ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
     ///   - Microsoft VSCode           https://nuke.build/vscode
 
-    public static int Main () => Execute<Build>(x => x.Default);
+    public static int Main () => Execute<Build>(x => x.PackSashimi);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
@@ -103,13 +103,16 @@ class Build : NukeBuild
                             .SetFramework(framework)
                             .SetRuntime(runtime)
                             .SetOutput(PublishDirectory / calamariFlavour / platform));
+                        File.Copy(RootDirectory / "global.json", PublishDirectory / calamariFlavour / platform / "global.json");
                     }
 
-                    if(framework.StartsWith("netcoreapp"))
+                    if(framework == "net5.0")
                     {
                         var runtimes = XmlTasks.XmlPeekSingle(project, "Project/PropertyGroup/RuntimeIdentifiers")?.Split(';');
-                        foreach(var runtime in runtimes)
+                        foreach (var runtime in runtimes)
+                        {
                             RunPublish(runtime, runtime);
+                        }
                     }
                     else
                     {
@@ -142,6 +145,7 @@ class Build : NukeBuild
                     .SetConfiguration(Configuration)
                     .SetOutput(PublishDirectory / sashimiFlavour));
 
+                File.Copy(RootDirectory / "global.json", PublishDirectory / sashimiFlavour / "global.json");
                 Logger.Trace($"{PublishDirectory}/{sashimiFlavour}");
                 CompressionTasks.CompressZip(PublishDirectory / sashimiFlavour, $"{ArtifactsDirectory / sashimiFlavour}.zip");
             }
@@ -170,9 +174,10 @@ class Build : NukeBuild
             ArtifactsDirectory.GlobFiles("*symbols*").ForEach(DeleteFile);
         });
 
+    // ReSharper disable once UnusedMember.Local - it is actually used (see TriggeredBy)
     Target CopyToLocalPackages => _ => _
         .DependsOn(Test)
-        .DependsOn(PackSashimi)
+        .TriggeredBy(PackSashimi)
         .Unlisted()
         .OnlyWhenStatic(() => IsLocalBuild)
         .Executes(() =>
@@ -196,7 +201,4 @@ class Build : NukeBuild
                 .SetTimeout(1200)
             );
     });
-
-    Target Default => _ => _
-        .DependsOn(CopyToLocalPackages);
 }
