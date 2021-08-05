@@ -4,7 +4,6 @@ using System.Linq;
 using FluentValidation;
 using Newtonsoft.Json.Linq;
 using Octopus.CoreParsers.Hcl;
-using Octopus.TinyTypes;
 using Sashimi.Server.Contracts;
 using Sashimi.Server.Contracts.ActionHandlers.Validation;
 using Sashimi.Server.Contracts.CloudTemplates;
