@@ -50,7 +50,6 @@ namespace Calamari.Terraform.Behaviours
                                                        "plan",
                                                        "-no-color",
                                                        "-detailed-exitcode",
-                                                       "--json",
                                                        GetOutputParameter(deployment),
                                                        GetExtraParameter,
                                                        cli.TerraformVariableFiles,
