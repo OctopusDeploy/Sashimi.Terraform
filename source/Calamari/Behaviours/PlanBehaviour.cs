@@ -26,12 +26,19 @@ namespace Calamari.Terraform.Behaviours
             this.commandLineRunner = commandLineRunner;
         }
 
-        protected virtual string ExtraParameter => "";
+        protected virtual string GetExtraParameter => "";
+
+        bool IsUsingPlanJSON(RunningDeployment deployment)
+        {
+            return deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput);
+        }
+
+        string GetOutputParameter(RunningDeployment deployment) => IsUsingPlanJSON(deployment) ? "--json" : "";
 
         protected override Task Execute(RunningDeployment deployment, Dictionary<string, string> environmentVariables)
         {
-            var jsonOutput = deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput);
-            
+            var jsonOutput = IsUsingPlanJSON(deployment);
+
             string results;
             using (var cli = new TerraformCliExecutor(log,
                                                       fileSystem,
@@ -39,28 +46,15 @@ namespace Calamari.Terraform.Behaviours
                                                       deployment,
                                                       environmentVariables))
             {
-                var arguments = jsonOutput
-                    ? new[]
-                    {
-                        "plan",
-                        "-no-color",
-                        "-detailed-exitcode",
-                        "--json",
-                        ExtraParameter,
-                        cli.TerraformVariableFiles,
-                        cli.ActionParams
-                    }
-                    : new[]
-                    {
-                        "plan",
-                        "-no-color",
-                        "-detailed-exitcode",
-                        ExtraParameter,
-                        cli.TerraformVariableFiles,
-                        cli.ActionParams
-                    };
-
-                var commandResult = cli.ExecuteCommand(out results, arguments);
+                var commandResult = cli.ExecuteCommand(out results,
+                                                       "plan",
+                                                       "-no-color",
+                                                       "-detailed-exitcode",
+                                                       "--json",
+                                                       GetOutputParameter(deployment),
+                                                       GetExtraParameter,
+                                                       cli.TerraformVariableFiles,
+                                                       cli.ActionParams);
                 var resultCode = commandResult.ExitCode;
 
                 cli.VerifySuccess(commandResult, r => r.ExitCode == 0 || r.ExitCode == 2);
@@ -78,17 +72,24 @@ namespace Calamari.Terraform.Behaviours
             {
                 CapturePlainTextOutput(deployment, results);
             }
-            
+
             return this.CompletedTask();
         }
 
-        public void CaptureJsonOutput(RunningDeployment deployment, string results)
+        void CapturePlainTextOutput(RunningDeployment deployment, string results)
+        {
+            log.Info(
+                     $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanOutput}' with the details of the plan");
+            log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanOutput, results, deployment.Variables);
+        }
+
+               public void CaptureJsonOutput(RunningDeployment deployment, string results)
         {
             var lines = Regex.Split(results, LineEndingRE);
             for (var index = 0; index < lines.Length; ++index)
             {
                 var variableName = $"TerraformPlanJsonLine{index}";
-                    
+
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{variableName}' with the details of the plan");
                 log.SetOutputVariable(variableName, lines[index], deployment.Variables);
@@ -105,23 +106,15 @@ namespace Calamari.Terraform.Behaviours
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanJsonChangesAdd}' with the the number of added resources in the plan");
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanJsonChangesAdd, parsed["changes"]?["add"]?.ToString() ?? "", deployment.Variables);
-                
+
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanJsonChangesRemove}' with the the number of removed resources in the plan");
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanJsonChangesRemove, parsed["changes"]?["remove"]?.ToString() ?? "", deployment.Variables);
-                
+
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanJsonChangesChange}' with the the number of changed resources in the plan");
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanJsonChangesChange, parsed["changes"]?["change"]?.ToString() ?? "", deployment.Variables);
             }
-        }
-
-        void CapturePlainTextOutput(RunningDeployment deployment, string results)
-        {
-            log.Info(
-                     $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanOutput}' with the details of the plan");
-            log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanOutput, results, deployment.Variables);
-
         }
     }
 }
