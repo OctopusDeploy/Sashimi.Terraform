@@ -87,7 +87,7 @@ namespace Calamari.Terraform.Behaviours
             var lines = Regex.Split(results, LineEndingRE);
             for (var index = 0; index < lines.Length; ++index)
             {
-                var variableName = $"PlanJsonLine{index}";
+                var variableName = $"TerraformPlanJsonLine{index}";
                     
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{variableName}' with the details of the plan");
