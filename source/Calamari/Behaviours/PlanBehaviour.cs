@@ -96,9 +96,12 @@ namespace Calamari.Terraform.Behaviours
 
         void CaptureChangeSummary(RunningDeployment deployment, string line)
         {
-            var parsed = JObject.Parse(line);
-            if (parsed["type"].ToString() == "change_summary")
+            try
             {
+                var parsed = JObject.Parse(line);
+                if (parsed["type"].ToString() != "change_summary")
+                    return;
+
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanJsonChangesAdd}' with the the number of added resources in the plan");
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanJsonChangesAdd, parsed["changes"]?["add"]?.ToString() ?? "", deployment.Variables);
@@ -110,6 +113,10 @@ namespace Calamari.Terraform.Behaviours
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanJsonChangesChange}' with the the number of changed resources in the plan");
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanJsonChangesChange, parsed["changes"]?["change"]?.ToString() ?? "", deployment.Variables);
+            }
+            catch
+            {
+                log.Warn("Terraform output invalid JSON in the line: " + line);
             }
         }
     }
