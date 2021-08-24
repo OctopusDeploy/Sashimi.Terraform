@@ -79,7 +79,7 @@ namespace Calamari.Terraform.Behaviours
             log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanOutput, results, deployment.Variables);
         }
 
-               public void CaptureJsonOutput(RunningDeployment deployment, string results)
+        public void CaptureJsonOutput(RunningDeployment deployment, string results)
         {
             var lines = Regex.Split(results, LineEndingRE);
             for (var index = 0; index < lines.Length; ++index)
