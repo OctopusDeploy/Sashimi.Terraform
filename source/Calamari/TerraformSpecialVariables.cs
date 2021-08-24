@@ -26,9 +26,9 @@ namespace Calamari.Terraform
                 public const string PlanDetailedExitCode = "TerraformPlanDetailedExitCode";
                 public const string EnvironmentVariables = "Octopus.Action.Terraform.EnvVariables";
                 public const string PlanJsonOutput = "Octopus.Action.Terraform.PlanJsonOutput";
-                public const string PlanJsonChangesAdd = "TerraformPlanJsonChangesAdd";
-                public const string PlanJsonChangesChange = "TerraformPlanJsonChangesChange";
-                public const string PlanJsonChangesRemove = "TerraformPlanJsonChangesRemove";
+                public const string PlanJsonChangesAdd = "TerraformPlanJsonAdd";
+                public const string PlanJsonChangesChange = "TerraformPlanJsonChange";
+                public const string PlanJsonChangesRemove = "TerraformPlanJsonRemove";
             }
         }
     }
