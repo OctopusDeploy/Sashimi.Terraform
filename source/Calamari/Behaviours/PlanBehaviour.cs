@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Calamari.Common.Commands;
@@ -37,8 +36,6 @@ namespace Calamari.Terraform.Behaviours
 
         protected override Task Execute(RunningDeployment deployment, Dictionary<string, string> environmentVariables)
         {
-            var jsonOutput = IsUsingPlanJSON(deployment);
-
             string results;
             using (var cli = new TerraformCliExecutor(log,
                                                       fileSystem,
@@ -63,7 +60,7 @@ namespace Calamari.Terraform.Behaviours
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanDetailedExitCode, resultCode.ToString(), deployment.Variables);
             }
 
-            if (jsonOutput)
+            if (IsUsingPlanJSON(deployment))
             {
                 CaptureJsonOutput(deployment, results);
             }
