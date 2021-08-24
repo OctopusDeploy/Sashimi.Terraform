@@ -26,7 +26,7 @@ namespace Calamari.Terraform.Behaviours
             this.commandLineRunner = commandLineRunner;
         }
 
-        protected virtual string GetExtraParameter => "";
+        protected virtual string ExtraParameter => "";
 
         bool IsUsingPlanJSON(RunningDeployment deployment)
         {
@@ -51,7 +51,7 @@ namespace Calamari.Terraform.Behaviours
                                                        "-no-color",
                                                        "-detailed-exitcode",
                                                        GetOutputParameter(deployment),
-                                                       GetExtraParameter,
+                                                       ExtraParameter,
                                                        cli.TerraformVariableFiles,
                                                        cli.ActionParams);
                 var resultCode = commandResult.ExitCode;
