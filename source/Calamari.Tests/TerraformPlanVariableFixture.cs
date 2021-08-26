@@ -36,13 +36,23 @@ namespace Calamari.Terraform.Tests
 
             calamariFileSystem = Substitute.For<ICalamariFileSystem>();
             commandLineRunner = Substitute.For<ICommandLineRunner>();
-            variables = Substitute.For<IVariables>();
+            variables = new CalamariVariables();
+            variables.Set(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput, "True");
             runningDeployment = Substitute.For<RunningDeployment>(variables);
+        }
+
+        [TestCase("0.11", "")]
+        [TestCase("0.11.5", "")]
+        [TestCase("0.12", "--json")]
+        [TestCase("1.0", "--json")]
+        public void EnsurePlanOnlyWorksForTwelveAndAbove(string version, string expected)
+        {
+            new PlanBehaviour(log, calamariFileSystem, commandLineRunner).GetOutputParameter(runningDeployment, new Version(version)).ShouldBe(expected);
         }
 
         [Test]
         public void TestVariablesAreCaptured()
-        { 
+        {
             var splitOutput = Regex.Split(JsonPlanOutput, PlanBehaviour.LineEndingRE);
             new PlanBehaviour(log, calamariFileSystem, commandLineRunner).CaptureJsonOutput(runningDeployment, JsonPlanOutput);
 

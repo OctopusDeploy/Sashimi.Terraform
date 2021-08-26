@@ -35,7 +35,7 @@ namespace Calamari.Terraform.Behaviours
             return deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput);
         }
 
-        string GetOutputParameter(RunningDeployment deployment, Version version)
+        public string GetOutputParameter(RunningDeployment deployment, Version version)
         {
             if (version.IsLessThan(TerraformPlanJsonMinVersion))
             {
