@@ -48,7 +48,7 @@ namespace Calamari.Terraform.Tests
 
             for (var index = 0; index < splitOutput.Length; ++index)
             {
-                outputVars[$"TerraformPlanJsonLine{index}"].ShouldBe(splitOutput[index]);
+                outputVars[$"TerraformPlanLine[{index}].JSON"].ShouldBe(splitOutput[index]);
             }
 
             outputVars[TerraformSpecialVariables.Action.Terraform.PlanJsonChangesAdd].ShouldBe("0");
