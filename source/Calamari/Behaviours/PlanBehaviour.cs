@@ -7,13 +7,16 @@ using Calamari.Common.Features.Processes;
 using Calamari.Common.Plumbing.FileSystem;
 using Calamari.Common.Plumbing.Logging;
 using Calamari.Common.Plumbing.Pipeline;
+using Calamari.Terraform.Helpers;
 using Newtonsoft.Json.Linq;
+using NuGet.Versioning;
 
 namespace Calamari.Terraform.Behaviours
 {
     public class PlanBehaviour : TerraformDeployBehaviour
     {
         public const string LineEndingRE = "\r\n?|\n";
+        public const string TerraformPlanJsonMinVersion = "0.12";
         readonly ICalamariFileSystem fileSystem;
         readonly ICommandLineRunner commandLineRunner;
 
@@ -32,7 +35,15 @@ namespace Calamari.Terraform.Behaviours
             return deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput);
         }
 
-        string GetOutputParameter(RunningDeployment deployment) => IsUsingPlanJSON(deployment) ? "--json" : "";
+        string GetOutputParameter(RunningDeployment deployment, Version version)
+        {
+            if (version.IsLessThan(TerraformPlanJsonMinVersion))
+            {
+                log.Warn($"JSON output is not supported in versions of Terraform prior to {TerraformPlanJsonMinVersion}. The version of Terraform being used is {version}");
+                return "";
+            }
+            return IsUsingPlanJSON(deployment) ? "--json" : "";
+        }
 
         protected override Task Execute(RunningDeployment deployment, Dictionary<string, string> environmentVariables)
         {
@@ -47,7 +58,7 @@ namespace Calamari.Terraform.Behaviours
                                                        "plan",
                                                        "-no-color",
                                                        "-detailed-exitcode",
-                                                       GetOutputParameter(deployment),
+                                                       GetOutputParameter(deployment, cli.Version),
                                                        ExtraParameter,
                                                        cli.TerraformVariableFiles,
                                                        cli.ActionParams);
