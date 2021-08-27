@@ -30,19 +30,15 @@ namespace Calamari.Terraform.Behaviours
 
         protected virtual string ExtraParameter => "";
 
-        bool IsUsingPlanJSON(RunningDeployment deployment)
+        bool IsUsingPlanJSON(RunningDeployment deployment, Version version)
         {
-            return deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput);
+            return !version.IsLessThan(TerraformPlanJsonMinVersion) &&
+                   deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput);
         }
 
         public string GetOutputParameter(RunningDeployment deployment, Version version)
         {
-            if (version.IsLessThan(TerraformPlanJsonMinVersion))
-            {
-                log.Warn($"JSON output is not supported in versions of Terraform prior to {TerraformPlanJsonMinVersion}. The version of Terraform being used is {version}");
-                return "";
-            }
-            return IsUsingPlanJSON(deployment) ? "--json" : "";
+            return IsUsingPlanJSON(deployment, version) ? "--json" : "";
         }
 
         protected override Task Execute(RunningDeployment deployment, Dictionary<string, string> environmentVariables)
@@ -54,6 +50,11 @@ namespace Calamari.Terraform.Behaviours
                                                       deployment,
                                                       environmentVariables))
             {
+                if (cli.Version.IsLessThan(TerraformPlanJsonMinVersion) && deployment.Variables.GetFlag(TerraformSpecialVariables.Action.Terraform.PlanJsonOutput))
+                {
+                    log.Warn($"JSON output is not supported in versions of Terraform prior to {TerraformPlanJsonMinVersion}. The version of Terraform being used is {cli.Version}");
+                }
+
                 var commandResult = cli.ExecuteCommand(out results,
                                                        "plan",
                                                        "-no-color",
@@ -69,15 +70,15 @@ namespace Calamari.Terraform.Behaviours
                 log.Info(
                          $"Saving variable 'Octopus.Action[{deployment.Variables["Octopus.Action.StepName"]}].Output.{TerraformSpecialVariables.Action.Terraform.PlanDetailedExitCode}' with the detailed exit code of the plan, with value '{resultCode}'.");
                 log.SetOutputVariable(TerraformSpecialVariables.Action.Terraform.PlanDetailedExitCode, resultCode.ToString(), deployment.Variables);
-            }
 
-            if (IsUsingPlanJSON(deployment))
-            {
-                CaptureJsonOutput(deployment, results);
-            }
-            else
-            {
-                CapturePlainTextOutput(deployment, results);
+                if (IsUsingPlanJSON(deployment, cli.Version))
+                {
+                    CaptureJsonOutput(deployment, results);
+                }
+                else
+                {
+                    CapturePlainTextOutput(deployment, results);
+                }
             }
 
             return this.CompletedTask();
