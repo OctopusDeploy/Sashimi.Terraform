@@ -79,7 +79,8 @@ namespace Calamari.Terraform.Behaviours
                 var bytes = Convert.FromBase64String(keyFile);
                 var json = Encoding.UTF8.GetString(bytes);
                 googleCloudEnvironmentVariables.Add("GOOGLE_CLOUD_KEYFILE_JSON", json);
-                Log.Verbose($"A JSON key has been set to GOOGLE_CLOUD_KEYFILE_JSON environment variable");
+                googleCloudEnvironmentVariables.Add("GOOGLE_BACKEND_CREDENTIALS", json);
+                Log.Verbose($"A JSON key has been set to GOOGLE_CLOUD_KEYFILE_JSON and GOOGLE_BACKEND_CREDENTIALS environment variables");
             }
 
             var impersonateServiceAccount = variables.GetFlag("Octopus.Action.GoogleCloud.ImpersonateServiceAccount");
