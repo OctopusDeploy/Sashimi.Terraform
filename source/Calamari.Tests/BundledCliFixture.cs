@@ -7,9 +7,8 @@ using Calamari.Common.Plumbing.Variables;
 using Calamari.Tests.Shared.Helpers;
 using FluentAssertions;
 using NUnit.Framework;
-using Sashimi.Tests.Shared;
 
-namespace Sashimi.Terraform.Tests
+namespace Calamari.Terraform.Tests
 {
     [TestFixture]
     public class BundledCliFixture
