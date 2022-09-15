@@ -16,7 +16,7 @@
         <PackageReference Include="FluentAssertions" Version="6.7.0" />
         <PackageReference Include="nunit" Version="3.13.2" />
         <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
         <PackageReference Include="TeamCity.VSTest.TestAdapter" Version="1.0.25" />
         <PackageReference Include="NSubstitute" Version="4.2.2" />
         <PackageReference Include="Shouldly" Version="2.8.2" />
@@ -27,23 +27,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Calamari\Calamari.csproj" />
     </ItemGroup>
-
-    <Target Name="GetPackageFiles" AfterTargets="ResolveReferences" DependsOnTargets="RunResolvePackageDependencies">
-        <Message Text="Collecting nupkg packages to bundle with Sashimi module binaries" />
-        <ItemGroup>
-            <!-- We ".ToLower()" on the Pacakge Definition names here as packages are downloaded with lower case, but this is using the
-            Include name which is camel case, so we want to make sure we lower case it so it can find the path correctly on unix systems -->
-            <Content Include="@(PackageDefinitions-&gt;'%(ResolvedPath)/$([System.String]::new('%(Name)').ToLower()).%(Version).nupkg')" Condition="$([System.String]::new('%(Name)').ToLower().Contains('octopus.dependencies'))">
-                <Visible>false</Visible>
-                <Link>@(PackageDefinitions->'%(Name).nupkg')</Link>
-                <Pack>true</Pack>
-                <PackageCopyToOutput>true</PackageCopyToOutput>
-                <PackageFlatten>true</PackageFlatten>
-                <PackagePath>@(PackageDefinitions->'contentFiles/any/any/%(Name).nupkg')</PackagePath>
-                <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            </Content>
-        </ItemGroup>
-    </Target>
 
     <ItemGroup>
         <None Update="**/*.tf*">

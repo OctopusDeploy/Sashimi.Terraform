@@ -26,7 +26,7 @@ using NUnit.Framework;
 
 namespace Calamari.Terraform.Tests
 {
-    [TestFixture(BundledCliFixture.TerraformVersion)]
+    [TestFixture("0.11.15")]
     [TestFixture("0.13.0")]
     [TestFixture("1.0.0")]
     public class CommandsFixture
