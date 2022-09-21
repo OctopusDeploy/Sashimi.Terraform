@@ -90,6 +90,7 @@ namespace Calamari.Terraform.Tests
             ClearTerraformDirectory("AdditionalParams");
             ClearTerraformDirectory("AWS");
             ClearTerraformDirectory("Azure");
+            ClearTerraformDirectory("GoogleCloud");
             ClearTerraformDirectory("PlanDetailedExitCode");
             ClearTerraformDirectory("Simple");
             ClearTerraformDirectory($"TemplateDirectory{Path.DirectorySeparatorChar}SubFolder");
