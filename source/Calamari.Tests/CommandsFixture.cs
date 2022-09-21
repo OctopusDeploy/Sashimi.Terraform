@@ -20,6 +20,7 @@ using Calamari.Terraform.Commands;
 using Calamari.Terraform.Tests.CommonTemplates;
 using Calamari.Tests.Shared;
 using Calamari.Tests.Shared.Helpers;
+using Calamari.Tests.Shared.Requirements;
 using FluentAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -29,10 +30,11 @@ namespace Calamari.Terraform.Tests
     [TestFixture("0.11.15")]
     [TestFixture("0.13.0")]
     [TestFixture("1.0.0")]
+    [NonWindowsTestAttribute]
     public class CommandsFixture
     {
         string? customTerraformExecutable;
-        readonly string terraformCliVersion;
+        string terraformCliVersion;
         readonly string planCommand = GetCommandFromType(typeof(PlanCommand));
         readonly string applyCommand = GetCommandFromType(typeof(ApplyCommand));
         readonly string destroyCommand = GetCommandFromType(typeof(DestroyCommand));
@@ -121,7 +123,7 @@ namespace Calamari.Terraform.Tests
                 using (new TemporaryFile(zipPath))
                 {
                     using (var fileStream =
-                           new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
                     using (var stream = await client.GetStreamAsync($"{downloadBaseUrl}{fileName}"))
                     {
                         await stream.CopyToAsync(fileStream);
@@ -829,12 +831,12 @@ output ""config-map-aws-auth"" {{
                                                                   
                                                                   populateVariables(context);
 
-                                                                  if (!String.IsNullOrEmpty(folderName))
-                                                                  {
-                                                                      context.WithFilesToCopy(terraformFiles);
-                                                                  }
-                                                              })
-                                                 .Execute();
+                                                                                        if (!String.IsNullOrEmpty(folderName))
+                                                                                        {
+                                                                                            context.WithFilesToCopy(terraformFiles);
+                                                                                        }
+                                                                                    })
+                                                                       .Execute();
 
             assertResult(result);
             return result;
