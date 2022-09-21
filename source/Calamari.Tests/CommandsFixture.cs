@@ -475,7 +475,7 @@ namespace Calamari.Terraform.Tests
                 _.Variables.Add(KnownVariables.OriginalPackageDirectoryPath, temporaryFolder.DirectoryPath);
             }
 
-            var output = await ExecuteAndReturnResult(applyCommand, PopulateVariables, temporaryFolder.DirectoryPath);
+            var output = await ExecuteAndReturnResult(planCommand, PopulateVariables, temporaryFolder.DirectoryPath);
             output.OutputVariables.ContainsKey("TerraformPlanOutput").Should().BeTrue();
 
             output = await ExecuteAndReturnResult(applyCommand, PopulateVariables, temporaryFolder.DirectoryPath);
@@ -522,15 +522,15 @@ namespace Calamari.Terraform.Tests
                 _.Variables.Add(KnownVariables.OriginalPackageDirectoryPath, temporaryFolder.DirectoryPath);
             }
 
-            var output = await ExecuteAndReturnResult(GetCommandFromType(typeof(PlanCommand)), PopulateVariables, temporaryFolder.DirectoryPath);
+            var output = await ExecuteAndReturnResult(planCommand, PopulateVariables, temporaryFolder.DirectoryPath);
             output.OutputVariables.ContainsKey("TerraformPlanOutput").Should().BeTrue();
 
-            output = await ExecuteAndReturnResult(GetCommandFromType(typeof(ApplyCommand)), PopulateVariables, temporaryFolder.DirectoryPath);
+            output = await ExecuteAndReturnResult(applyCommand, PopulateVariables, temporaryFolder.DirectoryPath);
             output.OutputVariables.ContainsKey("TerraformValueOutputs[url]").Should().BeTrue();
             output.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be(expectedHostName);
             await AssertRequestResponse(HttpStatusCode.Forbidden);
 
-            await ExecuteAndReturnResult(GetCommandFromType(typeof(DestroyCommand)), PopulateVariables, temporaryFolder.DirectoryPath);
+            await ExecuteAndReturnResult(destroyPlanCommand, PopulateVariables, temporaryFolder.DirectoryPath);
 
             await AssertResponseIsNotReachable();
 
