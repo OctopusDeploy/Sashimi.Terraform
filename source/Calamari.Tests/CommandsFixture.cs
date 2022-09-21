@@ -225,6 +225,7 @@ namespace Calamari.Terraform.Tests
                                       _ =>
                                       {
                                           _.Variables.Add(TerraformSpecialVariables.Action.Terraform.Template, template);
+                                          _.Variables.Add(TerraformSpecialVariables.Action.Terraform.TemplateParameters, "{}");
                                           _.Variables.Add(TerraformSpecialVariables.Script.ScriptSource,
                                                           TerraformSpecialVariables.Script.ScriptSourceOptions.Inline);
                                           _.Variables.Add(TerraformSpecialVariables.Action.Terraform.EnvironmentVariables,
@@ -842,8 +843,8 @@ output ""config-map-aws-auth"" {{
                                                                                         .Equals(TerraformSpecialVariables.Script.ScriptSourceOptions.Inline, StringComparison.InvariantCultureIgnoreCase);
                                                                   if (isInline)
                                                                   {
-                                                                      var template = context.Variables.Get(TerraformSpecialVariables.Action.Terraform.Template) ?? string.Empty;
-                                                                      var variables = context.Variables.Get(TerraformSpecialVariables.Action.Terraform.TemplateParameters) ?? string.Empty;
+                                                                      var template = context.Variables.Get(TerraformSpecialVariables.Action.Terraform.Template);
+                                                                      var variables = context.Variables.Get(TerraformSpecialVariables.Action.Terraform.TemplateParameters);
                                                                       var isJsonFormat = true;
 
                                                                       try
@@ -856,10 +857,10 @@ output ""config-map-aws-auth"" {{
                                                                       }
 
                                                                       context.WithDataFileNoBom(
-                                                                                                template,
+                                                                                                template!,
                                                                                                 isJsonFormat ? TerraformSpecialVariables.JsonTemplateFile : TerraformSpecialVariables.HclTemplateFile);
                                                                       context.WithDataFileNoBom(
-                                                                                                variables,
+                                                                                                variables!,
                                                                                                 isJsonFormat ? TerraformSpecialVariables.JsonVariablesFile : TerraformSpecialVariables.HclVariablesFile);
                                                                   }
 
