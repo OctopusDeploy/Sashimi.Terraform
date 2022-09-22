@@ -530,7 +530,7 @@ namespace Calamari.Terraform.Tests
             output.OutputVariables["TerraformValueOutputs[url]"].Value.Should().Be(expectedHostName);
             await AssertRequestResponse(HttpStatusCode.Forbidden);
 
-            await ExecuteAndReturnResult(destroyPlanCommand, PopulateVariables, temporaryFolder.DirectoryPath);
+            await ExecuteAndReturnResult(destroyCommand, PopulateVariables, temporaryFolder.DirectoryPath);
 
             await AssertResponseIsNotReachable();
 
